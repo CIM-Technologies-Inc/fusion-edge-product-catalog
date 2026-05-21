@@ -1,4 +1,4 @@
-    import Fusion from './Fusion.jsx';
+    import { useState, useEffect } from 'react';
     import { Link } from "react-router-dom";
     import { useParams, useLocation } from 'react-router-dom';
     import { MdKeyboardArrowRight } from "react-icons/md";
@@ -7,19 +7,20 @@
     import { Md3dRotation } from "react-icons/md";
     import { FaMinus, FaPlus } from "react-icons/fa6";
     import { items } from '../data/items';
-    import { useState } from 'react';
-    import Footer from './Footer.jsx';
     import { FaStar, FaRegStar } from "react-icons/fa";
     import { RxDimensions } from "react-icons/rx";
     import { companies } from '../data/companies';
     import { useScreen } from '../context/ScreenContext';
+    import { div } from 'three/tsl';
     import revit from '../assets/img/icons/revit.svg';
     import sketch from '../assets/img/icons/sketch.svg';
     import Viewer from './Viewer.jsx';
     import Drawer from './Drawer';
     import ButtonFloater from "./ButtonFloater";
     import Breadcrumb from './BreadCrumb';
-    import { div } from 'three/tsl';
+    import Items from './Items'
+    import Footer from './Footer.jsx';
+    import Fusion from './Fusion.jsx';
 
     export default function PerProduct() {
         const { isMobile } = useScreen();
@@ -116,7 +117,7 @@
                 src: obj.src,
                 dimensionID: obj.dimensionID,
                 textureID: obj.textureID,
-                product: passedProduct
+                product: passedProduct,
             }));
             
             if (type === 'dimension') {
@@ -130,9 +131,20 @@
             }
         };
 
+        useEffect(() => {
+            setSelected((prev) => ({
+                ...prev,
+                quantity
+            }))
+            console.log(selected);
+        }, [quantity])
+
         return (
             <>
-                <ButtonFloater />
+                <ButtonFloater page={{
+                ...location,
+                showCompanyButton: false
+            }}/>
                 <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
                     <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
                         <Fusion />
@@ -375,6 +387,7 @@
                                         </div>
                                         <button onClick={() => {
                                                 console.log(selected);
+                                                // console.log(quantity);
                                             }} 
                                             className='cursor-pointer bg-[#2872fa] hover:bg-[#1864f1] p-4 rounded text-white w-full text-sm hover:scale-103 transition-all duration-300 ease-in-out'>
                                             Add to cart
@@ -554,9 +567,9 @@
                             </div>
                         </div>
 
-                        <div className='mt-14'>
+                        <div className='mt-20'>
                             <h1 className='text-xl font-semibold'>Related Product</h1>
-                            <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
+                            {/* <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
                                 {relatedProduct.map((itm, itmindx) => (
                                     <div
                                         key={`ccc-${itmindx}`}
@@ -601,7 +614,7 @@
                                                 <p className="mt-3 uppercase text-xs hover:text-blue-500">
                                                     {itm.category}
                                                 </p>
-                                            {/* </div> */}
+                                     
                                         </Link>
                                         <div className='mt-4'>
                                             <button onClick={() => showDetails(itm)} className='mt-auto cursor-pointer bg-[#2c539b] hover:bg-[#073998] p-2 rounded text-white w-full transition text-sm'>
@@ -610,7 +623,8 @@
                                         </div>
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
+                            <Items filteredItems={relatedProduct}/> 
                         </div>
                     </div>
                 </div>

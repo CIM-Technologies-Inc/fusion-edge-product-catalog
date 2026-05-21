@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
+import Layout from "../components/Layout";
 import App from '../App';
 import SampleInfo from '../components/SampleInfo'
 import MyAccount from '../components/MyAccount'
@@ -8,35 +9,72 @@ import PerProduct from '../components/PerProduct';
 import Login from '../components/Login'
 
 const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <App />,
+    // {
+    //     path: '/',
+    //     element: <App />,
+    //     children: [
+    //         {
+    //             index: true,
+    //             element: <SampleInfo />,
+    //         },
+    //         {
+    //             path: 'account',
+    //             element: <MyAccount />,
+    //         },
+    //         {
+    //             path: 'shop',
+    //             element: <Shop />,
+    //         },
+    //     ],
+    // },
+    // {
+    //     path: 'shop/:brand',
+    //     element: <Product />,
+    // },
+    // {
+    //     path: 'shop/:brand/:perproduct',
+    //     element: <PerProduct />,
+    // },
+    // {
+    //     path: '/login',
+    //     element: <Login />,
+    // },
+
+     {
+        path: "/",
+        element: <Layout />,   
         children: [
             {
-                index: true,
-                element: <SampleInfo />,
+                element: <App />,   
+                children: [
+                    {
+                        index: true,
+                        element: <SampleInfo />,
+                    },
+                    {
+                        path: "account",
+                        element: <MyAccount />,
+                    },
+                    {
+                        path: "shop",
+                        element: <Shop />,
+                    },
+                ],
+            },
+
+            {   
+                path: "shop/:brand",
+                element: <Product />,
             },
             {
-                path: 'account',
-                element: <MyAccount />,
+                path: "shop/:brand/:perproduct",
+                element: <PerProduct />,
             },
             {
-                path: 'shop',
-                element: <Shop />,
+                path: "login",
+                element: <Login />,
             },
         ],
-    },
-    {
-        path: 'shop/:brand',
-        element: <Product />,
-    },
-    {
-        path: 'shop/:brand/:perproduct',
-        element: <PerProduct />,
-    },
-    {
-        path: '/login',
-        element: <Login />,
     },
 ])
 

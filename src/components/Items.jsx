@@ -19,7 +19,7 @@ export default function Items({filteredItems}) {
 
     return (
         <>
-            <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
+            <div className="mb-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-10 gap-y-12 mt-2">
                 {
                     filteredItems.length > 0 ? (
                         filteredItems.map((item, indx) => {
@@ -51,11 +51,11 @@ export default function Items({filteredItems}) {
                                     to={`/shop/${item.company}/${item.name}`}
                                     state={{ item: item, currentCompany: company }}
                                     className="flex flex-col grow">
-                                    <div className="bg-white flex items-center justify-center h-52">
+                                    <div className="bg-white flex items-center justify-center h-74 overflow-hidden">
                                         <img
                                             src={item.src}
                                             alt={item.name}
-                                            className="w-full h-full object-contain"/>
+                                            className="w-70 h-70 object-contain"/>
                                     </div>
                                     <h3 className="text-base font-medium leading-snug text-slate-800 hover:text-blue-500">
                                         {item.name}

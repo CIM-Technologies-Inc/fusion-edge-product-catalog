@@ -5,30 +5,30 @@ import { PiBuildingsFill } from "react-icons/pi";
 import { MdOutlineCategory, Md3dRotation, MdArrowBackIos } from "react-icons/md";
 import { IoCloseSharp } from "react-icons/io5";
 import { Link } from "react-router-dom"
-import Fusion from './Fusion.jsx';
-import noResult from '../assets/img/icons/noResult.png';
-import Footer from './Footer.jsx';
 import { useScreen } from '../context/ScreenContext';
 import { div } from 'three/src/nodes/math/OperatorNode.js';
+import { companies } from '../data/companies';
+import noResult from '../assets/img/icons/noResult.png';
+import Fusion from './Fusion.jsx';
 import Drawer from './Drawer';
 import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
+import Items from './Items'
+import Footer from './Footer.jsx';
 
 export default function Products() {
     const { isMobile } = useScreen();
     const { brand } = useParams();
     const location = useLocation();
-
     // const company = location.state?.company;
     const [currentCompany, setCurrentCompany] = useState(location.state?.company);
-
     const [filteredItems, setFilteredItems] = useState([]);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDrawer, setShowDrawer] = useState(false);
     const [showViewer, setShowViewer] = useState(false);
-
+    const filteredCompany = companies.filter(f => f.id != currentCompany.id);
 
     const filterByCategory = (cat) => {
         const filtered = items.filter((item) =>
@@ -55,7 +55,11 @@ export default function Products() {
 
     return (
         <>
-            <ButtonFloater />
+            <ButtonFloater page={{
+                ...location,
+                showCompanyButton: true,
+                companies: filteredCompany
+            }}/>
             <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
                 <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
                     <Fusion />
@@ -145,7 +149,7 @@ export default function Products() {
                         gap-x-4 sm:gap-x-6 lg:gap-x-10 
                         gap-y-8 sm:gap-y-12 lg:gap-y-16 
                         mt-8"> */}
-                    <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
+                    {/* <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
                         {filteredItems.length > 0 ? (
                             filteredItems.map((itm, itmndx) => (
                                 <div
@@ -168,22 +172,21 @@ export default function Products() {
                                         state={{ item: itm, currentCompany}}
                                         // key={itmndx}
                                         className="flex flex-col grow">
-                                        {/* <div className="cursor-pointer hover:shadow-xl p-3 sm:p-4 md:p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl rounded-lg"> */}
-                                            <div className="bg-white flex items-center justify-center h-40 sm:h-48 md:h-52">
-                                                <img
-                                                    src={itm.src}
-                                                    alt={itm.name}
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            </div>
-                                            <h3 className="text-base font-medium leading-snug text-slate-800 hover:text-blue-500">
-                                                {itm.name}
-                                            </h3>
+                                        
+                                        <div className="bg-white flex items-center justify-center h-40 sm:h-48 md:h-52">
+                                            <img
+                                                src={itm.src}
+                                                alt={itm.name}
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <h3 className="text-base font-medium leading-snug text-slate-800 hover:text-blue-500">
+                                            {itm.name}
+                                        </h3>
 
-                                            <p className="mt-3 uppercase text-xs hover:text-blue-500">
-                                                {itm.category}
-                                            </p>
-                                        {/* </div> */}
+                                        <p className="mt-3 uppercase text-xs hover:text-blue-500">
+                                            {itm.category}
+                                        </p>
                                     </Link>
                                     <div className='mt-4'>
                                         <button onClick={() => {
@@ -213,8 +216,9 @@ export default function Products() {
                                     No Product Found!
                                 </h1>
                             </div>
-                        )}
-                    </div>
+                        )} 
+                    </div>*/}
+                    <Items filteredItems={filteredItems}/>  
                 </div>
             </div>
 
