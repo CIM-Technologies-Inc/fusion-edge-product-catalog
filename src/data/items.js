@@ -16,6 +16,15 @@ import polish from '../assets/img/texture/polish.jpg';
 import matte from '../assets/img/texture/matte.webp';
 import honed from '../assets/img/texture/honed.jpg';
 import embossed from '../assets/img/texture/embossed.jpg';
+import gray from '../assets/img/items/Gray.jpg';
+import gray1 from '../assets/img/items/Gray1.jpg';
+import gray2 from '../assets/img/items/Gray2.jpg';
+import blue from '../assets/img/items/Blue.jpg';
+import blue1 from '../assets/img/items/Blue1.jpg';
+import blue2 from '../assets/img/items/Blue2.jpg';
+import darkgray from '../assets/img/items/DarkGray.jpg';
+import lightgray from '../assets/img/items/LightGray.jpg';
+import sagegray from '../assets/img/items/SageGray.jpeg';
 
 export const items = [
     {
@@ -64,6 +73,14 @@ export const items = [
         brand: '', 
         sku: 'orange-0001', 
         price: '5,000.00', 
+         variation: {
+            color: [
+                {id: 1, src: darkgray, size: 'W: 223 cm H: 90 cm', color: 'Dark Gray'},
+                {id: 2, src: lightgray, size: 'W: 223 cm H: 90 cm', color: 'Light Gray'},
+                {id: 3, src: sagegray, size: 'W: 223 cm H: 90 cm', color: 'Sage Gray'},
+                {id: 4, src: img2, size: 'W: 223 cm H: 90 cm', color: 'Orange'},
+            ]
+        }, 
         specification: [
             'Total Dimensions: Approx. 223 cm (Width) x 144 cm (Depth) x 90 cm (Height)',
             'Bed Size: Approx. 195 cm (Width) x 172 cm (Depth), providing a large sleeping area',
@@ -85,7 +102,20 @@ export const items = [
         companyID: 1, 
         brand: '', 
         sku: 'test-0002', 
-        price: '3,000.00', 
+        price: '3,000.00',
+        variation: {
+            color: [
+                {id: 1, src: gray, size: 'W: 154 cm H: 89 cm', color: 'Gray', list: [
+                    {src: gray1},
+                    {src: gray2},
+                ]},
+                {id: 2, src: blue, size: 'W: 154 cm H: 89 cm', color: 'Blue', list: [
+                    {src: blue1},
+                    {src: blue2},
+                ]},
+                {id: 2, src: img3, size: 'W: 154 cm H: 89 cm', color: 'Brown'},
+            ]
+        }, 
         specification: [
             'Sofa Dimensions: 154 cm (W) x 83 cm (D) x 89 cm (H)',
             'Bed Dimensions: 127 cm (Bed Width) x 173 cm (Bed Depth) x 46 cm (Bed Height)',

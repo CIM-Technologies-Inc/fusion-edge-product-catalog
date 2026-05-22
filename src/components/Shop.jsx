@@ -19,15 +19,46 @@ export default function Shop() {
     const [search, setSearch] = useState('');
     const inputRef = useRef(null);
     const sliderRef = useRef(null);
+    const timeoutRef = useRef(null);
     const [showArrows, setShowArrows] = useState(false);
 
+    const startHideTimer = () => {
+        clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(() => {
+            setShowSearch(false);
+        }, 5000);
+    };
+
     const handleSearchClick = () => {
-        setShowSearch(true);
+         setShowSearch(true);
+
+        clearTimeout(timeoutRef.current);
 
         setTimeout(() => {
             inputRef.current?.focus();
         }, 200);
+
+        startHideTimer();
     };
+
+    const handleFocus = () => {
+        clearTimeout(timeoutRef.current);
+    };
+
+    const handleBlur = () => {
+        startHideTimer();
+    };
+
+    const handleChange = (e) => {
+        setSearch(e.target.value);
+
+        startHideTimer();
+    };
+
+    useEffect(() => {
+        return () => clearTimeout(timeoutRef.current);
+    }, []);
 
     const scroll = (direction) => {
         const container = sliderRef.current;
@@ -215,7 +246,9 @@ export default function Shop() {
                                 : "w-0 opacity-0"}`}>
                         <input
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={handleChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                             ref={inputRef}
                             type="text"
                             placeholder="Search..."

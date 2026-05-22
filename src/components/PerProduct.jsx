@@ -32,6 +32,7 @@
         const [showViewer, setShowViewer] = useState(false);
         const [showZoom, setShowZoom] = useState(false);
         const [view, setViewer] = useState(false);
+        const [animate, setAnimate] = useState(false);
         const [review, setReview] = useState(0);
         const [rating, setRating] = useState(0);
         const [hover, setHover] = useState(0);
@@ -39,6 +40,7 @@
         const [selectedProduct, setSelectedProduct] = useState(null);
         const [selectedDetails, setSelectedDetails] = useState([]);
         const [selectedTexture, setSelectedTexture] = useState([]);
+        const [productList, setProductList] = useState([]);
         const [passedItem, setPassedItem] = useState(null);
         const [tooltip, setTooltip] = useState({
             visible: false,
@@ -63,6 +65,22 @@
         // console.log(relatedProduct);
         // console.log('---');
 
+        const changeImage = (src, obj) => {
+            setAnimate(true);
+  
+            setTimeout(() => {
+                setImgSource(src);
+
+                if(obj?.list) {
+                    setProductList(obj.list);
+                } else {
+                    setProductList([]);
+                }
+
+                setAnimate(false);
+            }, 300);
+        };
+
         const showDetails = (file) => {
             if(file.hasOwnProperty('files')) {
                 setSelectedDetails(file.files);
@@ -72,26 +90,6 @@
             setShowDrawer(true);
             setSelectedProduct(file);
         }
-
-        // const handleSelect = (type, value, obj) => {
-        //     setSelected((prev) => ({
-        //         ...prev,
-        //         [type]: value,
-        //         ['src']: obj.src,
-        //         ['dimensionID']: obj.dimensionID,
-        //         ['textureID']: obj.textureID, 
-        //     }));
-
-        //     if(type == 'dimension') {
-        //         const texture = passedProduct.variation.texture.filter(f => f.dimensionID == obj.dimensionID);
-        //         setSelectedTexture(texture);
-        //     }
-            
-        //     console.log(passedProduct);
-        //     console.log(type);
-        //     console.log(value);
-        //     console.log(selected);
-        // };
 
         const handleSelect = (type, value, obj) => {
             // if same card clicked again -> unselect
@@ -183,20 +181,6 @@
                                     label: perproduct,
                                 },
                             ]}/>
-                            {/* <Link to="/shop" className='pb-1'>
-                                <span className="text-xs pl-1 hover:text-blue-500">SHOP</span>
-                            </Link>
-                            <MdKeyboardArrowRight className="text-sm font-medium ml-1"/>
-                            <Link to={`/shop/${com.val}`} state={{ company }} className='pb-1'>
-                                <span className="text-xs pl-1 hover:text-blue-500">CATEGORY</span>
-                            </Link>
-                            
-                            <MdKeyboardArrowRight className="text-sm font-medium ml-1"/>
-                            <Link to={`/shop/${com.val}`} state={{ company : {...company, filterBy: passedProduct.category}}} className='pb-1'>
-                                <span className="text-xs pl-1 uppercase  hover:text-blue-500">{passedProduct.category}</span>
-                            </Link>
-                            <MdKeyboardArrowRight className="text-sm font-medium ml-1"/>
-                            <span className="text-xs pl-1 uppercase font-semibold text-blue-500">{perproduct}</span> */}
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -219,7 +203,18 @@
                                     <img
                                         src={imgSource}
                                         alt="Item-Image"
-                                        className="w-full h-auto max-h-[900px] object-contain"
+                                        className={`
+                                            w-full
+                                            h-auto
+                                            max-h-225
+                                            object-contain
+                                            transition-all
+                                            duration-300
+                                            ease-in-out
+                                            ${animate
+                                                ? 'opacity-0 -translate-x-10'
+                                                : 'opacity-100 translate-x-0'}
+                                        `}
                                     />
                                     {tooltip.visible && (
                                         <div
@@ -244,6 +239,36 @@
                                     )}
                                     
                                 </div>
+                                {
+                                    productList.length > 0 && (
+                                        <div
+                                            className='flex flex-wrap gap-6 cursor-pointer mt-4'>
+                                            {
+                                                productList.map((prod, prodindx) => (
+                                                    <>
+                                                        <img
+                                                            onClick={() => setImgSource(prod.src)}
+                                                            src={prod.src}
+                                                            alt="Item-Image"
+                                                            className={`
+                                                                w-30
+                                                                h-30
+                                                                object-contain
+                                                                transition-all
+                                                                duration-300
+                                                                ease-in-out
+                                                                ${animate
+                                                                    ? 'opacity-0 -translate-x-10'
+                                                                    : 'opacity-100 translate-x-0'}
+                                                            `}
+                                                            
+                                                        />
+                                                    </>
+                                                ))
+                                            }
+                                        </div>
+                                    )
+                                }
                             </div>
 
                             <div className="mt-6">
@@ -299,35 +324,60 @@
                                         passedProduct?.variation && passedProduct.variation != '' && (
                                             <>
                                                 <p className='text-lg font-medium'>Variation</p>
-                                                <small className='block pl-6 mt-4 mb-4 font-medium'>Dimension/Size</small>
-
-                                                <div className='pl-6 flex flex-wrap gap-6'>
-                                                    {
-                                                        passedProduct.variation.dimension.map((dim, dimindx) => (
-                                                            <div key={`ddd-${dimindx}`} onClick={() => handleSelect('dimension', dim.size, dim)}>
-                                                                <div className={`
-                                                                    border 
-                                                                    ${
-                                                                        selected.dimension == dim.size
-                                                                            ? 'border-2 border-[#2872fa] text-[#2872fa] shadow-3xl'
-                                                                            : 'border-gray-100 bg-white'
-                                                                    }
-                                                                    hover:shadow-2xl
-                                                                    cursor-pointer 
-                                                                    transition-all 
-                                                                    duration-300 
-                                                                    rounded-xl 
-                                                                    p-5 
-                                                                    flex 
-                                                                    flex-col 
-                                                                    items-center`}>
-                                                                    <RxDimensions className='font-bold' size={30}/>
-                                                                </div>
-                                                                <span className={`block text-xs text-center mt-2 font-medium ${selected.dimension == dim.size ? 'text-[#2872fa] font-semibold': ''}`}>{dim.size}</span>
+                                                {
+                                                    passedProduct.variation?.color && (
+                                                        <>
+                                                            <small className='block pl-6 mt-4 mb-4 font-medium'>Color</small>
+                                                            <div className='pl-6 flex flex-wrap gap-6'>
+                                                                {
+                                                                    passedProduct.variation.color.map((clr, clrindx) => (
+                                                                        <div className='p-1 cursor-pointer hover:scale-115 transition-all duration-300 ease-in-out' 
+                                                                            onClick={() => changeImage(clr.src, clr)}
+                                                                            key={`lll-${clrindx}`}>
+                                                                            <img src={clr.src} alt="color" className={`${isMobile ? 'w-20 h-20 mx-auto' : 'w-30 h-30' }`} />
+                                                                            <p className={`block text-xs text-center mt-1 font-medium`}>{clr.size}</p>
+                                                                            <small className='block text-xs text-center mt-1 font-medium'>{clr.color}</small>
+                                                                        </div>
+                                                                    ))
+                                                                }
                                                             </div>
-                                                        ))
-                                                    }
-                                                </div>
+                                                        </>
+                                                    )
+                                                }
+                                                {
+                                                    passedProduct.variation?.dimension && passedProduct.dimension != '' && (
+                                                        <>
+                                                            <small className='block pl-6 mt-4 mb-4 font-medium'>Dimension/Size</small>
+                                                            <div className='pl-6 flex flex-wrap gap-6'>
+                                                                {
+                                                                    passedProduct.variation.dimension.map((dim, dimindx) => (
+                                                                        <div key={`ddd-${dimindx}`} onClick={() => handleSelect('dimension', dim.size, dim)}>
+                                                                            <div className={`
+                                                                                border 
+                                                                                ${
+                                                                                    selected.dimension == dim.size
+                                                                                        ? 'border-2 border-[#2872fa] text-[#2872fa] shadow-3xl'
+                                                                                        : 'border-gray-100 bg-white'
+                                                                                }
+                                                                                hover:shadow-2xl
+                                                                                cursor-pointer 
+                                                                                transition-all 
+                                                                                duration-300 
+                                                                                rounded-xl 
+                                                                                p-5 
+                                                                                flex 
+                                                                                flex-col 
+                                                                                items-center`}>
+                                                                                <RxDimensions className='font-bold' size={30}/>
+                                                                            </div>
+                                                                            <span className={`block text-xs text-center mt-2 font-medium ${selected.dimension == dim.size ? 'text-[#2872fa] font-semibold': ''}`}>{dim.size}</span>
+                                                                        </div>
+                                                                    ))
+                                                                }
+                                                            </div>
+                                                        </>
+                                                    )
+                                                }
                                             </>  
                                         )
                                     }
@@ -648,7 +698,7 @@
                             fixed
                             inset-0
                             bg-black/70
-                            z-[100]
+                            z-100
                             flex
                             items-center
                             justify-center
@@ -658,8 +708,8 @@
 
                         {/* Zoomed Image */}
                         <img
-                            src={passedProduct.src}
-                            alt={passedProduct.name}
+                            src={imgSource}
+                            alt="Product Image"
                             className="
                                 max-w-full
                                 max-h-full
