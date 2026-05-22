@@ -52,13 +52,12 @@
 
         const { perproduct } = useParams();
         const location = useLocation();
-
         const passedProduct = location.state?.item;
         const productDetails = items.filter(f => f.id == passedProduct.id);
         const relatedProduct = items.filter(f => f.company == passedProduct.company && f.id != passedProduct.id);
-
         const com = location.state?.currentCompany;
         const company = companies.filter(f => f.val == passedProduct.company)[0];
+        const [imgSource, setImgSource] = useState(passedProduct.src);
         // console.log(location.state);
         // console.log(com); 
         // console.log(relatedProduct);
@@ -110,7 +109,6 @@
                 return;
             }
 
-            // normal select
             setSelected((prev) => ({
                 ...prev,
                 [type]: value,
@@ -120,7 +118,7 @@
                 product: passedProduct,
             }));
             
-            if (type === 'dimension') {
+            if(type == 'dimension') {
                 if(passedProduct.variation?.texture) {
                     const texture = passedProduct.variation.texture.filter(
                         (f) => f.dimensionID == obj.dimensionID
@@ -128,6 +126,10 @@
 
                     setSelectedTexture(texture);
                 }
+            }
+
+            if(type == 'texture') {
+                setImgSource(obj.src);
             }
         };
 
@@ -215,8 +217,8 @@
                                         })
                                     }>
                                     <img
-                                        src={passedProduct.src}
-                                        alt={passedProduct.name}
+                                        src={imgSource}
+                                        alt="Item-Image"
                                         className="w-full h-auto max-h-[900px] object-contain"
                                     />
                                     {tooltip.visible && (
