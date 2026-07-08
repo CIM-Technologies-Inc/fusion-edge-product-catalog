@@ -29,7 +29,7 @@ import sagegray from '../assets/img/items/SageGray.jpeg';
 export const items = [
     {
         id: 1,
-        name: 'Aski Round Table',
+        product_name: 'Aski Round Table',
         src: img1,
         type: 'table',
         val: 'aski',

@@ -12,9 +12,9 @@ export default function Nav() {
 
   return (
     <>
-      <div className="p-4 sm:p-10 flex items-center justify-between pt-6">
+      <div className={`p-4 ${isMobile ? 'sm:pl-1 sm:pr-4' : 'sm:pl-30 sm:pr-30'} flex items-center justify-between pt-8`}>
         <Link to='/'>
-            <img src={fusion} alt="Logo" className="w-40 sm:w-80 h-auto cursor-pointer"/>
+            <img src={fusion} alt="Logo" className={`w-40 ${isMobile ? 'sm:w-50' : 'sm:w-80'} h-auto cursor-pointer`}/>
         </Link>
 
         {/* Desktop Menu */}

@@ -7,6 +7,7 @@ import Shop from '../components/Shop'
 import Product from '../components/Products';
 import PerProduct from '../components/PerProduct';
 import Login from '../components/Login'
+import Category from '../components/Category';
 
 const router = createBrowserRouter([
     // {
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
             {
                 path: "login",
                 element: <Login />,
+            },
+            {
+                path: "shop/category",
+                element: <Category />,
             },
         ],
     },

@@ -26,6 +26,7 @@
         const { isMobile } = useScreen();
         const [showDescription, setShowDescription] = useState(false);
         const [showClassification, setShowClassification] = useState(false);
+        const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
         const [showSpecification, setShowSpecification] = useState(false);
         const [showReview, setShowReview] = useState(false);
         const [showDrawer, setShowDrawer] = useState(false);
@@ -58,12 +59,15 @@
         const productDetails = items.filter(f => f.id == passedProduct.id);
         const relatedProduct = items.filter(f => f.company == passedProduct.company && f.id != passedProduct.id);
         const com = location.state?.currentCompany;
-        const company = companies.filter(f => f.val == passedProduct.company)[0];
-        const [imgSource, setImgSource] = useState(passedProduct.src);
-        // console.log(location.state);
-        // console.log(com); 
-        // console.log(relatedProduct);
-        // console.log('---');
+        const company = companies.filter(f => f.val == passedProduct.brand)[0];
+        const [imgSource, setImgSource] = useState(passedProduct.image_url);
+
+        // console.log(com);
+        // console.log(passedProduct);
+
+        const parsedSample = passedProduct?.sample_json
+            ? JSON.parse(passedProduct.sample_json)
+            : {};
 
         const changeImage = (src, obj) => {
             setAnimate(true);
@@ -136,7 +140,7 @@
                 ...prev,
                 quantity
             }))
-            console.log(selected);
+          
         }, [quantity])
 
         return (
@@ -158,7 +162,7 @@
                                     to: "/shop",
                                 },
                                 {
-                                    label: com.name,
+                                    label: com.product_name,
                                     to: `/shop/${com.val}`,
                                     state: { company },
                                 },
@@ -168,7 +172,7 @@
                                     state: { company },
                                 },
                                 {
-                                    label: passedProduct.category,
+                                    label: passedProduct.finish,
                                     to: `/shop/${com.val}`,
                                     state: {
                                         company: {
@@ -274,7 +278,7 @@
                             <div className="mt-6">
                                 <h1 className='text-3xl font-bold'>{perproduct}</h1>
                                 <span className='text-gray-600 font-bold block pt-4 text-lg uppercase'>₱  {passedProduct.price}</span>
-                                <div className={`flex items-center w-full ${isMobile ? 'flex-row-reverse gap-2 ml-auto' : ''}`}>
+                                {/* <div className={`flex items-center w-full ${isMobile ? 'flex-row-reverse gap-2 ml-auto' : ''}`}>
                                     <button onClick={() => showDetails(passedProduct)} 
                                         className="cursor-pointer 
                                         shadow 
@@ -316,7 +320,7 @@
                                             3D
                                         </button>
                                     </div>
-                                </div>
+                                </div> */}
                                 <hr className="border-gray-300 my-3" />
 
                                 <div className='mt-6'>
@@ -438,8 +442,7 @@
                                             </button>
                                         </div>
                                         <button onClick={() => {
-                                                console.log(selected);
-                                                // console.log(quantity);
+                                              
                                             }} 
                                             className='cursor-pointer bg-[#2872fa] hover:bg-[#1864f1] p-4 rounded text-white w-full text-sm hover:scale-103 transition-all duration-300 ease-in-out'>
                                             Add to cart
@@ -541,6 +544,41 @@
                                         </>
                                     )
                                 }
+                                {
+                                    passedProduct?.sample_json && passedProduct.sample_json != '' && (
+                                        <>
+                                            <div className={`flex justify-between cursor-pointer ${ showClassification ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowAdditionalInfo(prev => !prev);}}>
+                                                <span className='text-xs hover:text-blue-500 cursor-pointer'>ADDITIONAL INFORMATION</span>
+                                                {
+                                                    showAdditionalInfo
+                                                    ? <IoIosArrowUp className='cursor-pointer'/>
+                                                    : <IoIosArrowDown className='cursor-pointer'/>
+                                                }
+                                            </div>
+                                            <div
+                                                className={`
+                                                    overflow-hidden
+                                                    transition-all duration-300 ease-in-out
+                                                    ${showAdditionalInfo ? "max-h-500 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                `}>
+                                                {Object.entries(parsedSample)
+                                                    .filter(([key]) => key != "description" && key != "image_url")
+                                                    .map(([key, value]) => (
+                                                        <div key={key} className="flex pb-2">
+                                                            <span className="w-40 font-base capitalize">
+                                                                {key}
+                                                            </span>
+                                                            <span>
+                                                                {value ?? "-"}
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </div>
+                                             <hr className="border-gray-300 my-4" />
+                                        </>
+                                    )
+                                }
                                 <div className={`flex justify-between cursor-pointer ${ showReview ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowReview(prev => !prev);}}>
                                     <span className='text-xs font-base'>REVIEWS ({review})</span>
                                     {
@@ -621,61 +659,6 @@
 
                         <div className='mt-20'>
                             <h1 className='text-xl font-semibold'>Related Product</h1>
-                            {/* <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-10 gap-y-16 mt-2">
-                                {relatedProduct.map((itm, itmindx) => (
-                                    <div
-                                        key={`ccc-${itmindx}`}
-                                        className="
-                                            cursor-pointer
-                                            pl-4
-                                            pr-4
-                                            p-6
-                                            rounded-lg
-                                            hover:shadow-xl
-                                            hover:shadow-2xl
-                                            transition-all
-                                            duration-200
-                                            hover:-translate-y-2
-                                            flex
-                                            flex-col
-                                            h-full"
-                                            onClick={() => {
-                                                setSelectedTexture([]);
-                                                setSelected({});
-                                                window.scrollTo({
-                                                    top: 0,
-                                                    behavior: "smooth"
-                                                });
-                                            }}>
-                                        <Link
-                                            to={`/shop/${itm.company}/${itm.name}`}
-                                            state={{ item: itm, currentCompany: com}}
-                                            className="flex flex-col flex-grow">
-                                                <div className="bg-white flex items-center justify-center h-52">
-                                                    <img
-                                                        src={itm.src}
-                                                        alt={itm.name}
-                                                        className="w-full h-full object-contain"
-                                                    />
-                                                </div>
-
-                                                <h3 className="text-base font-medium  leading-snug text-slate-800 hover:text-blue-500">
-                                                    {itm.name}
-                                                </h3>
-
-                                                <p className="mt-3 uppercase text-xs hover:text-blue-500">
-                                                    {itm.category}
-                                                </p>
-                                     
-                                        </Link>
-                                        <div className='mt-4'>
-                                            <button onClick={() => showDetails(itm)} className='mt-auto cursor-pointer bg-[#2c539b] hover:bg-[#073998] p-2 rounded text-white w-full transition text-sm'>
-                                                Download
-                                            </button>   
-                                        </div>
-                                    </div>
-                                ))}
-                            </div> */}
                             <Items filteredItems={relatedProduct}/> 
                         </div>
                     </div>

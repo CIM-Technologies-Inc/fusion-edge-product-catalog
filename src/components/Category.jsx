@@ -16,28 +16,32 @@ import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
 import Items from './Items'
 import Footer from './Footer.jsx';
-import { supabase } from "./supabase";
+import { category} from '../data/category';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { style } from 'framer-motion/client';
 
 export default function Products() {
     const { isMobile } = useScreen();
-    const { brand } = useParams();
+    const { cat } = useParams();
     const location = useLocation();
-    // const company = location.state?.company;
-    const [currentCompany, setCurrentCompany] = useState(location.state?.company);
+    const ctgry = location.state?.cat;
+    const [currentCategory, setCurrentCategory] = useState(location.state?.cat);
     const [filteredItems, setFilteredItems] = useState([]);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDrawer, setShowDrawer] = useState(false);
     const [showViewer, setShowViewer] = useState(false);
-    const filteredCompany = companies.filter(f => f.id != currentCompany.id);
+    // const filteredCompany = companies.filter(f => f.id != currentCompany.id);
     const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
-    const [data, setData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
 
-  
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
 
@@ -57,23 +61,7 @@ export default function Products() {
             slider.scrollLeft + slider.clientWidth < slider.scrollWidth - 1
         );
     };
-
-    useEffect(() => {
-        async function fetchData() {
-            setIsLoading(true);
-            const result = await supabase
-                .from("product")
-                .select("*");
-
-            const dt = result.data.filter(f => f.brand == currentCompany.val);
-  
-            setFilteredItems(dt);
-            setIsLoading(false);
-        }
-
-        fetchData();
-    }, []);
-
+    
     useEffect(() => {
         const slider = categorySliderRef.current;
 
@@ -90,28 +78,28 @@ export default function Products() {
         };
     }, []);
 
-    const filterByCategory = (cat) => {
+    const filterByCategory = (ctgry) => {
         const filtered = items.filter((item) =>
-            item.company === brand &&
-            (cat.val === "all" || item.category === cat.val)
+            item.category == ctgry?.val || ctgry?.val == "all" 
         );
         setFilteredItems(filtered);
-        setSelectedCategory(cat.val);
+        setSelectedCategory(ctgry?.val);
     }
     
     useEffect(() => {
-        if (brand) {
+        if (ctgry?.val) {
             let filtered = [];
-            
-            if(currentCompany?.filterBy != undefined) {
-                filtered = items.filter((item) => item.company == brand && item.category == currentCompany.filterBy);
-            } else {
-                filtered = items.filter((item) => item.company == brand);
-            }
 
+            if(ctgry?.val != "all") {
+                filtered = items.filter((item) => item.category == ctgry?.val);
+            } else {
+                filtered = items;
+            }
+            console.log(filtered);
+            setSelectedCategory(ctgry?.val);
             setFilteredItems(filtered);
         }
-    }, [brand])
+    }, [cat])
 
     const scroll = (ref, direction) => {
         const container = ref.current;
@@ -129,7 +117,7 @@ export default function Products() {
             <ButtonFloater page={{
                 ...location,
                 showCompanyButton: true,
-                companies: filteredCompany
+                // companies: filteredCompany
             }}/>
             <div className="min-h-screen flex flex-col">
                 <div className="flex-1">
@@ -137,35 +125,48 @@ export default function Products() {
                         <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
                             <Fusion />
                         </div>
+                        <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
+                             <h1 className={`${isMobile ? 'text-md pt-4' : 'text-xl pt-6 mb-2'} font-semibold`}>TOP BRANDS</h1>
+                            <Swiper
+                                modules={[Autoplay, Pagination]}
+                                spaceBetween={20}
+                                slidesPerView={1}
+                                loop={true}
+                                autoplay={{
+                                    delay: 3000,
+                                    disableOnInteraction: false,
+                                }}
+                                pagination={{ clickable: true }}
+                                navigation>
+                                    {companies.map((com, ccindx) => {
+                                        const imgSrc = new URL(
+                                        `../assets/img/banner/${com.val}.png`,
+                                        import.meta.url
+                                        ).href;
+
+                                        return (
+                                        <SwiperSlide key={`aaa-${ccindx}`}>
+                                            <img
+                                            src={imgSrc}
+                                            alt={com.name}
+                                            className="w-full h-40 object-contain rounded-xl"
+                                            />
+                                        </SwiperSlide>
+                                        );
+                                    })}
+                            </Swiper>
+                        </div>
                         <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-20 pr-20'}`}>
-                            <div className='mt-12'>
-                                <Breadcrumb items={[{ label: 'Shop', to: '/shop' },{ label: currentCompany.product_name},]}/>
+                            <div className='mt-22'>
+                                <Breadcrumb items={[{ label: 'Shop', to: '/shop' },{ label: currentCategory.text},]}/>
                                     {/* <Link to="/shop" className="inline-block w-fit"> 
                                         <div className='flex items-center hover:text-blue-500 hover:font-semibold'>
                                             <MdArrowBackIos className='mr-2 text-xs'/>
                                             <span className='text-xs'>BACK</span>
                                         </div>
                                     </Link> */}
-                                {!isMobile ? (
-                                    <div className="mt-10 text-2xl font-bold text-gray-500">
-                                        <div className="flex items-center mr-2">
-                                            <PiBuildingsFill className="mr-2 text-[#2c539b]" />
-                                            <h2 className="text-[#2c539b]">{currentCompany.product_name}</h2>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className='mt-4 w-full'>
-                                        <img
-                                            src={new URL(`../assets/img/banner/${currentCompany.val}.png`, import.meta.url).href}
-                                            alt={currentCompany.product_name}
-                                            className="w-full h-auto object-contain"
-                                        />
-                                    </div>
-                                )}
-                                <div className='flex flex-wrap gap-3items-center mt-10'>
-                                    <MdOutlineCategory className='mr-1 text-gray-500 text-lg mt-1'/>
-                                    <h1 className="text-xl text-gray-500 font-bold">Category </h1><small className='pl-1 font-extralight pt-1'> (Browse all building product categories)</small>
-                                </div>
+
+                                <h1 className={`${isMobile ? 'text-xl pt-4' : 'text-3xl pt-8'} font-bold`}>Category</h1>
                                 
                                 <div className="flex flex-wrap items-center mt-2">
                                     {canScrollCategoryLeft && (
@@ -184,15 +185,15 @@ export default function Products() {
                                         overflow-x-hidden
                                         scroll-smooth
                                         flex-1`}>
-                                        {currentCompany.category.map((category, cindx) => {
+                                        {category.map((category, cindx) => {
                                             const iconSrc = new URL(`../assets/img/icons/${category.val}.png`,import.meta.url).href;
 
                                             return(    
                                                 <div
                                                     key={cindx}
                                                     onClick={() => {
-                                                        const { filterBy, ...updatedCompany } = currentCompany;
-                                                        setCurrentCompany(updatedCompany);
+                                                        const { filterBy, ...updatedCategory } = currentCategory;
+                                                        setCurrentCategory(updatedCategory);
                                                         setSelectedCategory(category.val);
                                                         filterByCategory(category);
                                                     }}
@@ -241,24 +242,7 @@ export default function Products() {
                                     )}
                                 </div>
                             </div>
-                            {
-                                isLoading ? (
-                                    <div className="flex space-x-2 justify-center items-center h-50">
-                                        <div className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"></div>
-                                        <div
-                                            className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"
-                                            style={{ animationDelay: "0.1s" }}> 
-                                                
-                                            </div>
-                                        <div
-                                            className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"
-                                            style={{ animationDelay: "0.3s" }}>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <Items filteredItems={filteredItems}/>  
-                                )
-                            }
+                            <Items filteredItems={filteredItems}/>  
                         </div>
                     </div>
                 </div>

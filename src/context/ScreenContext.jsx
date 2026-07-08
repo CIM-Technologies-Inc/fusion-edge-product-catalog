@@ -9,7 +9,7 @@ export const ScreenProvider = ({ children }) => {
     useEffect(() => {
 
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 640);
+            setIsMobile(window.innerWidth < 1000);
         };
 
         handleResize();
