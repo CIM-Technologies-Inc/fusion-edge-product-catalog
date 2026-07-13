@@ -1,6 +1,6 @@
 import img1 from '../assets/img/items/akaba.png';
 import img2 from '../assets/img/items/orange.jpg';
-import img3 from '../assets/img/items/berkshire.jpg';
+import img3 from '../assets/img/items/Berkshire.jpg';
 import img4 from '../assets/img/items/Tile1.webp';
 import img5 from '../assets/img/items/Tile2.webp';
 import img6 from '../assets/img/items/Danee.jpg';
