@@ -97,25 +97,152 @@ export default function Shop() {
             )
             .subscribe();
 
-        return () => {
-            supabase.removeChannel(channel);
-        };
-        }, []);
+            return () => {
+                supabase.removeChannel(channel);
+            };
+    }, []);
 
-        async function fetchData() {
-            setIsLoading(true);
+        // async function fetchData() {
+        //     setIsLoading(true);
 
-            const { data, error } = await supabase
+        //     const { data, error } = await supabase
+        //         .from("product")
+        //         .select("*")
+        //         .eq("status", "published");
+
+        //     const { data: attributes, error: attributesError } = await supabase
+        //         .from("product_attribute")
+        //         .select("*");
+
+        //     const { data: values, error: valuesError } = await supabase
+        //         .from("product_attribute_value")
+        //         .select("*");
+
+        //     if (!error) {
+
+        //         const filteredData = data.map((dt) => {
+        //             const brandAttribute = attributes.find(
+        //                 (attribute) =>
+        //                     attribute.product_id === dt.id &&
+        //                     attribute.name === "brand"
+        //             );
+
+        //             const brandValue = values.find(
+        //                 (value) =>
+        //                     brandAttribute &&
+        //                     value.attribute_id === brandAttribute.id
+        //             );
+
+        //             return {
+        //                 ...dt,
+        //                 brand: brandAttribute,
+        //                 brand_value: brandValue
+        //             };
+        //         });
+        //         // console.log(filteredData);
+        //         setData(data);
+        //     }
+        //     console.log(data);
+        //     console.log(attributes);
+        //     console.log(values);
+        //     console.log('-----------');
+        //     setIsLoading(false);
+        // }
+
+    async function fetchData() {
+        setIsLoading(true);
+
+        const [
+            { data: products, error: productError },
+            { data: attributes, error: attributesError },
+            { data: values, error: valuesError }
+        ] = await Promise.all([
+            supabase
                 .from("product")
                 .select("*")
-                .eq("status", "published");
+                .eq("status", "published"),
 
-            if (!error) {
-                setData(data);
-            }
-            console.log(data);
+            supabase
+                .from("product_attribute")
+                .select("*"),
+
+            supabase
+                .from("product_attribute_value")
+                .select("*")
+        ]);
+
+        if (
+            productError ||
+            attributesError ||
+            valuesError
+        ) {
+            console.error(
+                productError ||
+                attributesError ||
+                valuesError
+            );
+
             setIsLoading(false);
+            return;
         }
+
+        // Create attribute lookup
+        const attributeMap = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name == "brand")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        const finishMap = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name === "finish")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        // Create value lookup
+        const valueMap = Object.fromEntries(
+            values.map(value => [
+                value.attribute_id,
+                value
+            ])
+        );
+
+
+        const filteredData = products.map(product => {
+            const brandAttribute = attributeMap[product.id];
+            const finishAttribute = finishMap[product.id];
+
+            const brandValue = brandAttribute
+                ? valueMap[brandAttribute.id]
+                : null;
+
+            const finishValue = finishAttribute
+                ? valueMap[finishAttribute.id]
+                : null;
+
+            return {
+                ...product,
+                brand: brandValue?.value ?? null,
+                finish: finishValue?.value ?? null
+            };
+        });
+
+
+        // console.log(filteredData);
+        // console.log(products);
+        // console.log(attributes);
+        // console.log(values);
+        // console.log('----------');
+
+        setData(filteredData);
+        setIsLoading(false);
+    }
 
     useEffect(() => {
         const slider = categorySliderRef.current;
@@ -268,20 +395,17 @@ export default function Shop() {
     }
 
     const filteredItems = data.filter((item) => {
-        const searchValue = search.toLowerCase();
+        const searchValue = search.toLowerCase().trim();
 
         const matchesSearch =
-            item.product_name?.toLowerCase().includes(searchValue) 
-            // ||
-            // item.category.toLowerCase().includes(searchValue) ||
-            // item.company?.toLowerCase().includes(searchValue);
+            !searchValue ||
+            item.product_name?.toLowerCase().includes(searchValue);
 
         const matchesCategory =
-            selectedCategory == "all" 
-            // ||
-            // item.category.toLowerCase() == selectedCategory.toLowerCase();
+            selectedCategory == "all" ||
+            item.category?.toLowerCase() == selectedCategory.toLowerCase();
 
-        return matchesSearch;
+        return matchesSearch && matchesCategory;
     });
 
     return (

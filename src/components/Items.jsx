@@ -26,7 +26,7 @@ export default function Items({filteredItems}) {
                         filteredItems.length > 0 ? (
                             filteredItems.map((item, indx) => {
                             const company = companies.filter(f => f.val == item.brand)[0];
-                            console.log(filteredItems);
+                            // console.log(filteredItems);
                             return (
                                 <motion.div
                                     key={indx}
@@ -101,7 +101,7 @@ export default function Items({filteredItems}) {
                                             )}
                                         </div>
                                         <p className={`${isMobile ? 'mt-1' : 'mt-3'} font-semibold`}><small className='uppercase text-[#2c539b]'>{item.brand}</small></p>
-                                        <p className={`${isMobile ? 'mt-1' : 'mt-3'} uppercase text-xs hover:text-blue-500`}>
+                                        <p className={`${isMobile ? 'mt-1' : 'mt-3'} uppercase text-xs text-[#2c539b] font-semibold`}>
                                             {item.finish}
                                         </p>
                                     </Link>

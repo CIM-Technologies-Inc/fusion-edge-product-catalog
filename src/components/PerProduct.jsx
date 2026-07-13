@@ -62,7 +62,7 @@
         const company = companies.filter(f => f.val == passedProduct.brand)[0];
         const [imgSource, setImgSource] = useState(passedProduct.image_url);
 
-        console.log(location.state);
+        // console.log(location.state);
         // console.log(passedProduct);
 
         const parsedSample = passedProduct?.sample_json
