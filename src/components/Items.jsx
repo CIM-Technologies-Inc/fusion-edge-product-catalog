@@ -17,16 +17,16 @@ export default function Items({filteredItems}) {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const { isMobile } = useScreen();
-
+    // console.log(filteredItems);
     return (
         <>
-            <div className="mb-6 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-x-10 gap-y-12 mt-2">
+            <div className="mb-6 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-x-10 gap-y-12 mt-2">
                 <AnimatePresence mode="popLayout">
                     {
                         filteredItems.length > 0 ? (
                             filteredItems.map((item, indx) => {
                             const company = companies.filter(f => f.val == item.brand)[0];
-
+                            console.log(filteredItems);
                             return (
                                 <motion.div
                                     key={indx}

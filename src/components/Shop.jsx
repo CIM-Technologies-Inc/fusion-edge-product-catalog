@@ -75,18 +75,47 @@ export default function Shop() {
     };
 
     useEffect(() => {
+        fetchData();
+
+        const channel = supabase
+            .channel("product-changes")
+            .on(
+            "postgres_changes",
+            {
+                event: "UPDATE",
+                schema: "public",
+                table: "product",
+            },
+            (payload) => {
+                console.log("Product updated:", payload);
+
+                // Status changed to published
+                if (payload.new.status === "published") {
+                fetchData();
+                }
+            }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+        }, []);
+
         async function fetchData() {
             setIsLoading(true);
-            const result = await supabase
+
+            const { data, error } = await supabase
                 .from("product")
-                .select("*");
-            console.log(result.data);
-            setData(result.data);
+                .select("*")
+                .eq("status", "published");
+
+            if (!error) {
+                setData(data);
+            }
+            console.log(data);
             setIsLoading(false);
         }
-
-        fetchData();
-    }, []);
 
     useEffect(() => {
         const slider = categorySliderRef.current;
