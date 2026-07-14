@@ -96,7 +96,7 @@ export default function Items({filteredItems}) {
                                                     text-white
                                                     shadow-lg
                                                     z-50">
-                                                    {item.name}
+                                                    {item.product_name}
                                                 </div>
                                             )}
                                         </div>

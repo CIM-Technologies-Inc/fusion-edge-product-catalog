@@ -293,7 +293,7 @@
                                          
                                         <figure
                                             draggable
-                                            className="mt-6 cursor-grab relative"
+                                            className="ct-media-container"
                                             style={{ cursor: "grab" }}
 
                                             data-src={passedProduct.image_url}
@@ -340,7 +340,7 @@
                                             }>
                                                 <figure
                                                     draggable
-                                                    className="mt-6 cursor-grab relative"
+                                                    className="ct-media-container"
                                                     style={{ cursor: "grab" }}
 
                                                     data-src={passedProduct.image_url}
