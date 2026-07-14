@@ -21,10 +21,12 @@
     import Items from './Items'
     import Footer from './Footer.jsx';
     import Fusion from './Fusion.jsx';
+    import { supabase } from "./supabase";
 
     export default function PerProduct() {
         const { isMobile } = useScreen();
         const [showDescription, setShowDescription] = useState(false);
+        const [showAttribute, setShowAttribute] = useState(false);
         const [showClassification, setShowClassification] = useState(false);
         const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
         const [showSpecification, setShowSpecification] = useState(false);
@@ -42,6 +44,10 @@
         const [selectedDetails, setSelectedDetails] = useState([]);
         const [selectedTexture, setSelectedTexture] = useState([]);
         const [productList, setProductList] = useState([]);
+        const [variantList, setVariantList] = useState([]);
+        const [variant, setVariant] = useState("");
+        const [forVariation, setForVariation] = useState(false);
+        const [attributes, setAttributes] = useState({});
         const [passedItem, setPassedItem] = useState(null);
         const [tooltip, setTooltip] = useState({
             visible: false,
@@ -143,6 +149,99 @@
           
         }, [quantity])
 
+        const fetchAttribute = async () => {
+            if (!passedProduct?.attr_id) return;
+           
+            const { data: attributes, error: attributesError } = await supabase
+                .from("product_attribute")
+                .select("*")
+                .eq("id", passedProduct.prod_attr_id)
+                .single();
+
+            if (attributesError) {
+                console.error(attributesError);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from("product_attribute_value")
+                .select("*")
+                .eq("id", passedProduct.attr_id)
+                .single();
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+           
+            if(attributes.used_for_variation) {
+                setVariantList(JSON.parse(data.value));
+                setForVariation(attributes.used_for_variation);
+            } 
+            const { data: productAttributes, error: productAttributeError } = await supabase
+                .from("product_attribute")
+                .select("id, name")
+                .eq("product_id", passedProduct.id)
+                .eq("used_for_variation", false);
+
+            if (productAttributeError) {
+                console.error(productAttributeError);
+                return;
+            }
+
+            const attributeIds = productAttributes.map(item => item.id);
+
+            const { data: attributeValues, error: attributeValueError } = await supabase
+                .from("product_attribute_value")
+                .select("attribute_id, value")
+                .in("attribute_id", attributeIds);
+
+            if (attributeValueError) {
+                console.error(attributeValueError);
+                return;
+            }
+            
+            const result = productAttributes.reduce((obj, attribute) => {
+                const value = attributeValues.find(
+                    item => item.attribute_id === attribute.id
+                );
+
+                obj[attribute.name] = value?.value ?? "";
+
+                return obj;
+            }, {});
+            setAttributes(result);
+        };
+
+        useEffect(() => {
+            // if (!passedProduct?.attr_id) return;
+            fetchAttribute();
+            
+            const channel = supabase
+                .channel(`product_attribute_value_${passedProduct.attr_id}`)
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*", // Listen for INSERT, UPDATE, DELETE
+                        schema: "public",
+                        table: "product_attribute_value",
+                        filter: `id=eq.${passedProduct.attr_id}`,
+                    },
+                    (payload) => {
+                        console.log("Realtime change:", payload);
+
+                        // Re-fetch latest data
+                        fetchAttribute();
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        }, []);
+
+
         return (
             <>
                 <ButtonFloater page={{
@@ -150,11 +249,11 @@
                 showCompanyButton: false
             }}/>
                 <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
-                    <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
+                    <div className={`${isMobile ? 'pl-8 pr-8': 'pl-40 pr-40'}`}>
                         <Fusion />
                     </div>
 
-                    <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-20 pr-20'}`}>
+                    <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-40 pr-40'}`}>
                         <div className='mt-20 flex flex-wrap items-center gap-y-2'>
                             <Breadcrumb items={[
                                 {
@@ -187,62 +286,121 @@
                             ]}/>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="grid sm:grid-cols-1 lg:grid-cols-2 md:grid-cols-1 gap-8">
                             <div>
-                                <div className="mt-6 cursor-pointer relative"
-                                    onClick={() => setShowZoom(true)}
-                                    onMouseEnter={() =>
-                                        setTooltip((prev) => ({ ...prev, visible: true }))
-                                    }
-                                    onMouseLeave={() =>
-                                        setTooltip((prev) => ({ ...prev, visible: false }))
-                                    }
-                                    onMouseMove={(e) =>
-                                        setTooltip({
-                                            visible: true,
-                                            x: e.clientX,
-                                            y: e.clientY,
-                                        })
-                                    }>
-                                    <img
-                                        src={imgSource}
-                                        alt="Item-Image"
-                                        className={`
-                                            w-full
-                                            h-auto
-                                            max-h-225
-                                            object-contain
-                                            transition-all
-                                            duration-300
-                                            ease-in-out
-                                            ${animate
-                                                ? 'opacity-0 -translate-x-10'
-                                                : 'opacity-100 translate-x-0'}
-                                        `}
-                                    />
-                                    {tooltip.visible && (
-                                        <div
-                                            className="
-                                                fixed
-                                                z-50
-                                                bg-[#2872fa]
-                                                text-white
-                                                text-xs
-                                                px-3
-                                                py-2
-                                                rounded
-                                                pointer-events-none
-                                                whitespace-nowrap
-                                                transition"
-                                            style={{
-                                                top: tooltip.y + 15,
-                                                left: tooltip.x + 15,
-                                            }}>
-                                            Click to zoom image
+                                {
+                                    variant ? (
+                                         
+                                        <figure
+                                            draggable
+                                            className="mt-6 cursor-grab relative"
+                                            style={{ cursor: "grab" }}
+
+                                            data-src={passedProduct.image_url}
+                                            data-width="400"
+                                            data-height="400"
+                                            data-cim-url={passedProduct.image_url}
+                                            data-cim-kind={attributes.kind ?? ""}
+                                            data-cim-name={passedProduct.product_name}
+                                            data-cim-price={passedProduct.price}
+                                            data-cim-brand={passedProduct.brand}
+                                            data-cim-finish={passedProduct.finish}
+                                            data-cim-substrate={attributes.substrate ?? ""}
+                                            data-cim-application={attributes.application ?? ""}
+                                            data-cim-coverage={attributes.coverage ?? ""}
+                                            data-cim-packaging={attributes.packaging ?? ""}
+                                            data-cim-material-id={passedProduct.id}
+                                            data-cim-color-code={variant?.hex ?? ""}>
+                                                <div className="flex items-center gap-3 mt-6 mb-4 p-2">
+                                                    <div
+                                                        className="w-full aspect-square rounded-[72px] border "
+                                                        style={{
+                                                            backgroundColor: variant.hex,
+                                                            borderColor: variant.hex,
+                                                        }}
+                                                    />
+                                                </div>
+                                        </figure>
+                                        
+                                    ) : (
+                                        <div className="mt-6 cursor-pointer relative"
+                                            onClick={() => setShowZoom(true)}
+                                            onMouseEnter={() =>
+                                                setTooltip((prev) => ({ ...prev, visible: true }))
+                                            }
+                                            onMouseLeave={() =>
+                                                setTooltip((prev) => ({ ...prev, visible: false }))
+                                            }
+                                            onMouseMove={(e) =>
+                                                setTooltip({
+                                                    visible: true,
+                                                    x: e.clientX,
+                                                    y: e.clientY,
+                                                })
+                                            }>
+                                                <figure
+                                                    draggable
+                                                    className="mt-6 cursor-grab relative"
+                                                    style={{ cursor: "grab" }}
+
+                                                    data-src={passedProduct.image_url}
+                                                    data-width="400"
+                                                    data-height="400"
+                                                    data-cim-url={passedProduct.image_url}
+                                                    data-cim-kind={attributes.kind ?? ""}
+                                                    data-cim-name={passedProduct.product_name}
+                                                    data-cim-price={passedProduct.price}
+                                                    data-cim-brand={passedProduct.brand}
+                                                    data-cim-finish={passedProduct.finish}
+                                                    data-cim-substrate={attributes.substrate ?? ""}
+                                                    data-cim-application={attributes.application ?? ""}
+                                                    data-cim-coverage={attributes.coverage ?? ""}
+                                                    data-cim-packaging={attributes.packaging ?? ""}
+                                                    data-cim-material-id={passedProduct.id}
+                                                    data-cim-color-code={variant?.hex ?? ""}
+                                                >
+                                                <img
+                                                    src={imgSource}
+                                                    alt="Item-Image"
+                                                    className={`
+                                                        w-full
+                                                        h-auto
+                                                        max-h-225
+                                                        object-contain
+                                                        transition-all
+                                                        duration-300
+                                                        ease-in-out
+                                                        ${animate
+                                                            ? 'opacity-0 -translate-x-10'
+                                                            : 'opacity-100 translate-x-0'}
+                                                    `}
+                                                />
+                                            </figure>
+                                            {tooltip.visible && (
+                                                <div
+                                                    className="
+                                                        fixed
+                                                        z-50
+                                                        bg-[#2872fa]
+                                                        text-white
+                                                        text-xs
+                                                        px-3
+                                                        py-2
+                                                        rounded
+                                                        pointer-events-none
+                                                        whitespace-nowrap
+                                                        transition"
+                                                    style={{
+                                                        top: tooltip.y + 15,
+                                                        left: tooltip.x + 15,
+                                                    }}>
+                                                    Click to zoom image
+                                                </div>
+                                            )}
+                                            
                                         </div>
-                                    )}
-                                    
-                                </div>
+                                    )
+                                }
                                 {
                                     productList.length > 0 && (
                                         <div
@@ -278,6 +436,90 @@
                             <div className="mt-6">
                                 <h1 className='text-3xl font-bold'>{perproduct}</h1>
                                 <span className='text-gray-600 font-bold block pt-4 text-lg uppercase'>₱  {passedProduct.price}</span>
+                                {
+                                    forVariation && (
+                                        <span className='text-gray-600 font-medium block pt-4 text-md'>Variant</span>
+                                    )
+                                }
+                                {/* <select className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 mt-4 mb-4"
+                                    onChange={(e) => {
+                                        const selected = variantList.find(
+                                            (item) => item.code === e.target.value
+                                        );
+
+                                        setVariant(selected);
+                                    }}
+                                >
+                                    <option value="">{perproduct}</option>
+
+                                    {variantList.map((variant) => (
+                                        <option key={variant.code} value={variant.code}>
+                                        {variant.name}
+                                        </option>
+                                    ))}
+                                </select> */}
+                                {
+                                    forVariation && (
+                                         <div className="flex flex-wrap gap-3 mt-4 mb-4">
+                                            {variantList.map((item) => (
+                                                <button
+                                                    key={item.code}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setVariant(item);
+                                                        // console.log(item);
+                                                    }}
+                                                    title={`${item.name} (${item.code})`}
+                                                    className={`
+                                                        w-12
+                                                        h-12
+                                                        rounded-full
+                                                        border-2
+                                                        transition-all
+                                                        duration-200
+                                                        hover:scale-110
+                                                        cursor-pointer
+                                                        ${
+                                                            variant?.code == item.code
+                                                                ? "border-black ring-2 ring-blue-500"
+                                                                : "border-gray-300"
+                                                        }
+                                                    `}
+                                                    style={{
+                                                        backgroundColor: item.hex,
+                                                        borderColor: item.hex,
+                                                    }}
+                                                />
+                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={() => setVariant(null)}
+                                                title="Show Product Image"
+                                                className={`
+                                                    w-12
+                                                    h-12
+                                                    rounded-full
+                                                    bg-white
+                                                    cursor-pointer
+                                                    transition-all
+                                                    duration-200
+                                                    hover:scale-110
+                                                    ${!variant ? "ring-2 ring-blue-500" : ""}
+                                                `}>
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )
+                                }
+                                {
+                                    variant && (
+                                        <>
+                                            <span className='text-gray-600 font-medium block pt-4 text-md'>Variant Name - Code </span>
+                                            <p className='text-gray-600 font-medium block pt-2 text-md'>{`${variant.name} ${variant.code}`}</p>
+                                        </>
+                                        
+                                    )
+                                }
                                 {/* <div className={`flex items-center w-full ${isMobile ? 'flex-row-reverse gap-2 ml-auto' : ''}`}>
                                     <button onClick={() => showDetails(passedProduct)} 
                                         className="cursor-pointer 
@@ -321,7 +563,7 @@
                                         </button>
                                     </div>
                                 </div> */}
-                                <hr className="border-gray-300 my-3" />
+                                {/* <hr className="border-gray-300 my-3" /> */}
 
                                 <div className='mt-6'>
                                     {
@@ -426,8 +668,8 @@
                                 
                                 </div>
 
-                                <div className='mt-10'>
-                                    <div className='flex flex-col sm:flex-row sm:items-center gap-3 mt-8 mb-8'>
+                                <div className=''>
+                                    {/* <div className='flex flex-col sm:flex-row sm:items-center gap-3 mt-8 mb-8'>
                                         <div className='flex items-center border border-blue-500 rounded p-2 sm:p-3 w-fit self-end sm:self-auto mr-1'>
                                             <button className='cursor-pointer hover:bg-[#2872fa] hover:text-white p-2 rounded transition-colors duration-300 ease-in-out'
                                                 onClick={() =>
@@ -447,7 +689,7 @@
                                             className='cursor-pointer bg-[#2872fa] hover:bg-[#1864f1] p-4 rounded text-white w-full text-sm hover:scale-103 transition-all duration-300 ease-in-out'>
                                             Add to cart
                                         </button>
-                                    </div>
+                                    </div> */}
                                     <p className='text-sm font-semibold text-gray-700 leading-7'>SKU : <span className='text-gray-400 uppercase'>{passedProduct.sku}</span></p>
                                     
                                     <p className='text-sm font-semibold text-gray-700 leading-7'>BRAND : <span className='text-gray-400 uppercase'>{passedProduct.brand}</span></p>
@@ -474,10 +716,41 @@
                                                     {passedProduct.description}
                                                 </span>
                                             </div>
-                                            <hr className="border-gray-300 my-4" />
+                                           
                                         </>
                                     )
                                 }
+                                {
+                                    !forVariation && (
+                                        <>
+                                            <hr className="border-gray-300 my-4" />
+                                            <div className={`flex justify-between cursor-pointer ${ showAttribute ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowAttribute(prev => !prev);}}>
+                                                <span className='text-xs hover:text-blue-500 cursor-pointer'>ATTRIBUTES</span>
+                                                {
+                                                    showAttribute 
+                                                    ? <IoIosArrowUp className='cursor-pointer'/>
+                                                    : <IoIosArrowDown className='cursor-pointer'/>
+                                                }
+                                            </div>
+                                            <div
+                                                className={`
+                                                    overflow-hidden
+                                                    transition-all duration-300 ease-in-out
+                                                    ${showAttribute ? "max-h-40 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                `}>
+                                                {Object.entries(attributes).map(([key, value]) => (
+                                                    <div key={key} className="flex pb-2">
+                                                        <span className="w-40 font-base capitalize">
+                                                            {key}
+                                                        </span>
+                                                        <span>{value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )
+                                }
+                                <hr className="border-gray-300 my-4" />
                                 {
                                     passedProduct?.classification && passedProduct.classification != '' && (
                                         <>

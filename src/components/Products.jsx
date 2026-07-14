@@ -134,10 +134,10 @@ export default function Products() {
             <div className="min-h-screen flex flex-col">
                 <div className="flex-1">
                     <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
-                        <div className={`${isMobile ? 'pl-8 pr-8': 'pl-20 pr-20'}`}>
+                        <div className={`${isMobile ? 'pl-8 pr-8': 'pl-40 pr-40'}`}>
                             <Fusion />
                         </div>
-                        <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-20 pr-20'}`}>
+                        <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-40 pr-40'}`}>
                             <div className='mt-12'>
                                 <Breadcrumb items={[{ label: 'Shop', to: '/shop' },{ label: currentCompany.product_name},]}/>
                                     {/* <Link to="/shop" className="inline-block w-fit"> 

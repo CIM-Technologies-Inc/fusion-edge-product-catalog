@@ -87,7 +87,7 @@ export default function Shop() {
                 table: "product",
             },
             (payload) => {
-                console.log("Product updated:", payload);
+                // console.log("Product updated:", payload);
 
                 // Status changed to published
                 if (payload.new.status === "published") {
@@ -101,53 +101,6 @@ export default function Shop() {
                 supabase.removeChannel(channel);
             };
     }, []);
-
-        // async function fetchData() {
-        //     setIsLoading(true);
-
-        //     const { data, error } = await supabase
-        //         .from("product")
-        //         .select("*")
-        //         .eq("status", "published");
-
-        //     const { data: attributes, error: attributesError } = await supabase
-        //         .from("product_attribute")
-        //         .select("*");
-
-        //     const { data: values, error: valuesError } = await supabase
-        //         .from("product_attribute_value")
-        //         .select("*");
-
-        //     if (!error) {
-
-        //         const filteredData = data.map((dt) => {
-        //             const brandAttribute = attributes.find(
-        //                 (attribute) =>
-        //                     attribute.product_id === dt.id &&
-        //                     attribute.name === "brand"
-        //             );
-
-        //             const brandValue = values.find(
-        //                 (value) =>
-        //                     brandAttribute &&
-        //                     value.attribute_id === brandAttribute.id
-        //             );
-
-        //             return {
-        //                 ...dt,
-        //                 brand: brandAttribute,
-        //                 brand_value: brandValue
-        //             };
-        //         });
-        //         // console.log(filteredData);
-        //         setData(data);
-        //     }
-        //     console.log(data);
-        //     console.log(attributes);
-        //     console.log(values);
-        //     console.log('-----------');
-        //     setIsLoading(false);
-        // }
 
     async function fetchData() {
         setIsLoading(true);
@@ -198,7 +151,16 @@ export default function Shop() {
 
         const finishMap = Object.fromEntries(
             attributes
-                .filter(attr => attr.name === "finish")
+                .filter(attr => attr.name == "finish")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        const attr_id = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name == "Color Variation")
                 .map(attr => [
                     attr.product_id,
                     attr
@@ -217,19 +179,26 @@ export default function Shop() {
         const filteredData = products.map(product => {
             const brandAttribute = attributeMap[product.id];
             const finishAttribute = finishMap[product.id];
+            const idAttribute = attr_id[product.id];
 
-            const brandValue = brandAttribute
+            const attr = brandAttribute
                 ? valueMap[brandAttribute.id]
                 : null;
 
-            const finishValue = finishAttribute
+            const vals = finishAttribute
                 ? valueMap[finishAttribute.id]
                 : null;
 
+            const attrid = idAttribute
+                ? valueMap[idAttribute.id]
+                : null;   
+
             return {
                 ...product,
-                brand: brandValue?.value ?? null,
-                finish: finishValue?.value ?? null
+                brand: attr?.value ?? null,
+                finish: vals?.value ?? null,
+                attr_id: attrid?.id ?? null,
+                prod_attr_id: attrid?.attribute_id ?? null
             };
         });
 
