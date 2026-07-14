@@ -10,36 +10,6 @@ import Login from '../components/Login'
 import Category from '../components/Category';
 
 const router = createBrowserRouter([
-    // {
-    //     path: '/',
-    //     element: <App />,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <SampleInfo />,
-    //         },
-    //         {
-    //             path: 'account',
-    //             element: <MyAccount />,
-    //         },
-    //         {
-    //             path: 'shop',
-    //             element: <Shop />,
-    //         },
-    //     ],
-    // },
-    // {
-    //     path: 'shop/:brand',
-    //     element: <Product />,
-    // },
-    // {
-    //     path: 'shop/:brand/:perproduct',
-    //     element: <PerProduct />,
-    // },
-    // {
-    //     path: '/login',
-    //     element: <Login />,
-    // },
 
      {
         path: "/",
