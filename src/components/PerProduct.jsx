@@ -412,6 +412,8 @@
                                         transition-all
                                         duration-300
                                         ease-in-out
+                                        ${variant ? 'rounded-[114px] p-6' : ''}
+                                        mt-4
                                         ${animate
                                             ? 'opacity-0 -translate-x-10'
                                             : 'opacity-100 translate-x-0'}
@@ -517,6 +519,7 @@
                                                 type="button"
                                                 // onClick={() => setVariant(null)}
                                                 onClick={() => {
+                                                    setVariant(null)
                                                     setImgSource(passedProduct?.image_url)
                                                 }}
                                                 
