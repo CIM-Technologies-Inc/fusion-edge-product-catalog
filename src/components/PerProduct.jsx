@@ -336,97 +336,105 @@
                         </div>
 
                         <div className="grid sm:grid-cols-1 lg:grid-cols-2 md:grid-cols-1 gap-8">
-                            {/* <div> */}
-                                {
-                                    variant ? (
-                                        <figure
-                                            
-                                            class="ct-media-container"
-                                            style={{ cursor: "grab" }}
-                                            
-                                            data-src={passedProduct.image_url}
-                                            data-width="400"
-                                            data-height="400"
-                                            {...productAttributes}>
-                                                <div className="flex items-center gap-3 mt-6 mb-4 p-2">
-                                                    <div
-                                                        className="w-full aspect-square rounded-[72px] border "
-                                                        style={{
-                                                            backgroundColor: variant.hex,
-                                                            borderColor: variant.hex,
-                                                        }}
-                                                    />
-                                                </div>
-                                        </figure>
-                                        
-                                    ) : (
-                                        // <div className="mt-6 cursor-pointer relative"
-
-                                        //     >
-                                                <figure
-                                                    
-                                                    className="ct-media-container"
-                                                    style={{ cursor: "grab" }}
-
-                                                    data-src={passedProduct.image_url}
-                                                    data-width="400"
-                                                    data-height="400"
-                                                    {...productAttributes}
-                                                >
-                                                <img
-                                                    src={imgSource}
-                                                    alt="Item-Image"
-                                                    className={`
-                                                        w-full
-                                                        h-auto
-                                                        max-h-225
-                                                        object-contain
-                                                        transition-all
-                                                        duration-300
-                                                        ease-in-out
-                                                        ${animate
-                                                            ? 'opacity-0 -translate-x-10'
-                                                            : 'opacity-100 translate-x-0'}
-                                                    `}
+                            {/* {
+                                variant ? (
+                                    <figure
+                                        class="ct-media-container"
+                                        style={{ cursor: "grab" }}
+                                        data-src={passedProduct.image_url}
+                                        data-width="400"
+                                        data-height="400"
+                                        {...productAttributes}>
+                                            <div className="flex items-center gap-3 mt-6 mb-4 p-2">
+                                                <div
+                                                    className="w-full aspect-square rounded-[72px] border "
+                                                    style={{
+                                                        backgroundColor: variant.hex,
+                                                        borderColor: variant.hex,
+                                                    }}
                                                 />
-                                            </figure>
-                                       
-                                            
-                                        // </div>
-                                    )
-                                }
-                                {
-                                    productList.length > 0 && (
-                                        <div
-                                            className='flex flex-wrap gap-6 cursor-pointer mt-4'>
-                                            {
-                                                productList.map((prod, prodindx) => (
-                                                    <>
-                                                        <img
-                                                            onClick={() => setImgSource(prod.src)}
-                                                            src={prod.src}
-                                                            alt="Item-Image"
-                                                            className={`
-                                                                w-30
-                                                                h-30
-                                                                object-contain
-                                                                transition-all
-                                                                duration-300
-                                                                ease-in-out
-                                                                ${animate
-                                                                    ? 'opacity-0 -translate-x-10'
-                                                                    : 'opacity-100 translate-x-0'}
-                                                            `}
-                                                            
-                                                        />
-                                                    </>
-                                                ))
-                                            }
-                                        </div>
-                                    )
-                                }
-                            {/* </div> */}
-
+                                            </div>
+                                    </figure>
+                                    
+                                ) : (
+                                    <figure
+                                        className="ct-media-container"
+                                        style={{ cursor: "grab" }}
+                                        data-src={passedProduct.image_url}
+                                        data-width="400"
+                                        data-height="400"
+                                        {...productAttributes}>
+                                        <img
+                                            src={imgSource}
+                                            alt="Item-Image"
+                                            className={`
+                                                w-full
+                                                h-auto
+                                                max-h-225
+                                                object-contain
+                                                transition-all
+                                                duration-300
+                                                ease-in-out
+                                                ${animate
+                                                    ? 'opacity-0 -translate-x-10'
+                                                    : 'opacity-100 translate-x-0'}
+                                            `}/>
+                                    </figure>
+                                )
+                            } */}
+                            <figure
+                                className="ct-media-container"
+                                style={{ cursor: "grab" }}
+                                data-src={passedProduct.image_url}
+                                data-width="400"
+                                data-height="400"
+                                {...productAttributes}>
+                                <img
+                                    src={imgSource}
+                                    alt="Item-Image"
+                                    className={`
+                                        w-full
+                                        h-auto
+                                        max-h-225
+                                        object-contain
+                                        transition-all
+                                        duration-300
+                                        ease-in-out
+                                        ${animate
+                                            ? 'opacity-0 -translate-x-10'
+                                            : 'opacity-100 translate-x-0'}
+                                    `}/>
+                            </figure>
+                            {
+                                productList.length > 0 && (
+                                    <div
+                                        className='flex flex-wrap gap-6 cursor-pointer mt-4'>
+                                        {
+                                            productList.map((prod, prodindx) => (
+                                                <>
+                                                    <img
+                                                        onClick={() => setImgSource(prod.src)}
+                                                        src={prod.src}
+                                                        alt="Item-Image"
+                                                        className={`
+                                                            w-30
+                                                            h-30
+                                                            object-contain
+                                                            transition-all
+                                                            duration-300
+                                                            ease-in-out
+                                                            ${animate
+                                                                ? 'opacity-0 -translate-x-10'
+                                                                : 'opacity-100 translate-x-0'}
+                                                        `}
+                                                        
+                                                    />
+                                                </>
+                                            ))
+                                        }
+                                    </div>
+                                )
+                            }
                             <div className="mt-6">
                                 <h1 className='text-3xl font-bold'>{perproduct}</h1>
                                 <span className='text-gray-600 font-bold block pt-4 text-lg uppercase'>₱  {passedProduct.price}</span>

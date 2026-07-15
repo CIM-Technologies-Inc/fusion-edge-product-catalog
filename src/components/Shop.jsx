@@ -203,7 +203,7 @@ export default function Shop() {
         });
 
 
-        // console.log(filteredData);
+        console.log(filteredData);
         // console.log(products);
         // console.log(attributes);
         // console.log(values);
