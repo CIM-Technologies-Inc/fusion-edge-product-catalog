@@ -300,7 +300,7 @@
                                             data-width="400"
                                             data-height="400"
                                             data-cim-url={passedProduct.image_url}
-                                            data-cim-kind={attributes.kind ?? ""}
+                                            data-cim-kind={passedProduct.category ?? ""}
                                             data-cim-name={passedProduct.product_name}
                                             data-cim-price={passedProduct.price}
                                             data-cim-brand={passedProduct.brand}
@@ -347,7 +347,7 @@
                                                     data-width="400"
                                                     data-height="400"
                                                     data-cim-url={passedProduct.image_url}
-                                                    data-cim-kind={attributes.kind ?? ""}
+                                                    data-cim-kind={passedProduct.category ?? ""}
                                                     data-cim-name={passedProduct.product_name}
                                                     data-cim-price={passedProduct.price}
                                                     data-cim-brand={passedProduct.brand}

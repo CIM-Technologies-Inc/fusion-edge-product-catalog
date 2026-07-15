@@ -10,6 +10,7 @@ import sketch from '../assets/img/icons/sketch.svg';
 import autocad from '../assets/img/icons/autocad.svg';
 import Drawer from './Drawer';
 import { motion, AnimatePresence } from "framer-motion";
+import Swal from 'sweetalert2'
 
 export default function Items({filteredItems}) {
     const [showDrawer, setShowDrawer] = useState(false);
@@ -45,16 +46,31 @@ export default function Items({filteredItems}) {
                                         flex
                                         flex-col
                                         h-full`}
-                                        onClick={() => {
+                                       >
+                                    <Link
+                                        to={item.brand ? `/shop/${item.brand}/${item.product_name}` : "#"}
+                                        state={{ item: item, currentCompany: company }}
+                                        className="flex flex-col grow"
+                                        onClick={(e) => {
+                                            if (!item.brand) {
+                                                e.preventDefault();
+
+                                                // Show notification here
+                                                Swal.fire({
+                                                    title: 'Warning!',
+                                                    text: "This product doesn't have a brand!",
+                                                    icon: 'warning',
+                                                    confirmButtonText: 'OK'
+                                                })
+                                                // alert("This product doesn't have a brand.");
+                                                return;
+                                            }
+
                                             window.scrollTo({
                                                 top: 0,
-                                                behavior: "smooth"
+                                                behavior: "smooth",
                                             });
                                         }}>
-                                    <Link
-                                        to={`/shop/${item.brand}/${item.product_name}`}
-                                        state={{ item: item, currentCompany: company }}
-                                        className="flex flex-col grow">
                                         <div className=" bg-white
                                             flex
                                             items-center
@@ -73,7 +89,7 @@ export default function Items({filteredItems}) {
                                         </h3> */}
                                         <div className="relative group">
                                             <h3 className="text-base font-medium leading-snug text-slate-800 hover:text-blue-500">
-                                                {isMobile && item.product_name.length > 9
+                                                {isMobile && item.product_name?.length > 9
                                                     ? `${item.product_name.slice(0, 9)}...`
                                                     : item.product_name}
                                             </h3>

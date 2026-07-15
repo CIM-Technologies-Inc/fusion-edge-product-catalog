@@ -25,6 +25,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { style } from 'framer-motion/client';
 
+
 export default function Products() {
     const { isMobile } = useScreen();
     const { cat } = useParams();
@@ -95,7 +96,8 @@ export default function Products() {
             } else {
                 filtered = items;
             }
-            console.log(filtered);
+            // console.log(ctgry);
+            // console.log(filtered);
             setSelectedCategory(ctgry?.val);
             setFilteredItems(filtered);
         }
