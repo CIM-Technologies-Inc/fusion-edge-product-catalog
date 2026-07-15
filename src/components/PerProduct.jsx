@@ -67,6 +67,7 @@
         const com = location.state?.currentCompany;
         const company = companies.filter(f => f.val == passedProduct.brand)[0];
         const [imgSource, setImgSource] = useState(passedProduct.image_url);
+        const [productAttributes, setProductAttributes] = useState({});
 
         // console.log(location.state);
         // console.log(passedProduct);
@@ -148,6 +149,7 @@
             }))
           
         }, [quantity])
+        
 
         const fetchAttribute = async () => {
             if (!passedProduct?.attr_id) return;
@@ -214,7 +216,6 @@
         };
 
         useEffect(() => {
-            // if (!passedProduct?.attr_id) return;
             fetchAttribute();
             
             const channel = supabase
@@ -241,6 +242,54 @@
             };
         }, []);
 
+        const loadProductAttributes = async () => {
+            if (!passedProduct?.id) return;
+
+            try {
+                const { data: attributes, error: attrError } = await supabase
+                    .from("product_attribute")
+                    .select("id, name")
+                    .eq("product_id", passedProduct.id);
+
+                if (attrError) throw attrError;
+
+                if (!attributes || attributes.length == 0) {
+                    setProductAttributes({});
+                    return;
+                }
+
+                const attributeIds = attributes.map(attr => attr.id);
+
+                const { data: values, error: valueError } = await supabase
+                    .from("product_attribute_value")
+                    .select("attribute_id, value")
+                    .in("attribute_id", attributeIds);
+
+                if (valueError) throw valueError;
+
+                const valueMap = {};
+
+                values.forEach(item => {
+                    valueMap[item.attribute_id] = item.value;
+                });
+
+                const result = {};
+
+                attributes.forEach(attr => {
+                    // result[attr.name] = valueMap[attr.id] ?? null;
+                    result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
+                });
+
+                setProductAttributes(result);
+
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        useEffect(() => {
+            loadProductAttributes();
+        }, [passedProduct]);
 
         return (
             <>
@@ -295,22 +344,11 @@
                                             draggable
                                             className="ct-media-container"
                                             style={{ cursor: "grab" }}
-                                            data-cim-phase="Final Coat"
+                                            
                                             data-src={passedProduct.image_url}
                                             data-width="400"
                                             data-height="400"
-                                            data-cim-url="https://fusionedge.instawp.site/wp-content/uploads/2026/06/Matt-Gold.png"
-                                            data-cim-kind={passedProduct.category ?? ""}
-                                            data-cim-name={passedProduct.product_name}
-                                            data-cim-price={passedProduct.price}
-                                            data-cim-brand={passedProduct.brand}
-                                            data-cim-finish={passedProduct.finish}
-                                            data-cim-substrate={attributes.substrate ?? ""}
-                                            data-cim-application={attributes.application ?? ""}
-                                            data-cim-coverage={attributes.coverage ?? ""}
-                                            data-cim-packaging={attributes.packaging ?? ""}
-                                            data-cim-material-id={passedProduct.id}
-                                            data-cim-color-code={variant?.hex ?? ""}>
+                                            {...productAttributes}>
                                                 <div className="flex items-center gap-3 mt-6 mb-4 p-2">
                                                     <div
                                                         className="w-full aspect-square rounded-[72px] border "
@@ -342,22 +380,11 @@
                                                     draggable
                                                     className="ct-media-container"
                                                     style={{ cursor: "grab" }}
-                                                    data-cim-phase="Final Coat"
+
                                                     data-src={passedProduct.image_url}
                                                     data-width="400"
                                                     data-height="400"
-                                                    data-cim-url="https://fusionedge.instawp.site/wp-content/uploads/2026/06/Matt-Gold.png"
-                                                    data-cim-kind={passedProduct.category ?? ""}
-                                                    data-cim-name={passedProduct.product_name}
-                                                    data-cim-price={passedProduct.price}
-                                                    data-cim-brand={passedProduct.brand}
-                                                    data-cim-finish={passedProduct.finish}
-                                                    data-cim-substrate={attributes.substrate ?? ""}
-                                                    data-cim-application={attributes.application ?? ""}
-                                                    data-cim-coverage={attributes.coverage ?? ""}
-                                                    data-cim-packaging={attributes.packaging ?? ""}
-                                                    data-cim-material-id={passedProduct.id}
-                                                    data-cim-color-code={variant?.hex ?? ""}
+                                                    {...productAttributes}
                                                 >
                                                 <img
                                                     src={imgSource}
