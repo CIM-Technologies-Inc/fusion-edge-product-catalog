@@ -336,13 +336,12 @@
                         </div>
 
                         <div className="grid sm:grid-cols-1 lg:grid-cols-2 md:grid-cols-1 gap-8">
-                            <div>
+                            {/* <div> */}
                                 {
                                     variant ? (
-                                         
                                         <figure
-                                            draggable
-                                            className="ct-media-container"
+                                            
+                                            class="ct-media-container"
                                             style={{ cursor: "grab" }}
                                             
                                             data-src={passedProduct.image_url}
@@ -361,23 +360,11 @@
                                         </figure>
                                         
                                     ) : (
-                                        <div className="mt-6 cursor-pointer relative"
-                                            onClick={() => setShowZoom(true)}
-                                            onMouseEnter={() =>
-                                                setTooltip((prev) => ({ ...prev, visible: true }))
-                                            }
-                                            onMouseLeave={() =>
-                                                setTooltip((prev) => ({ ...prev, visible: false }))
-                                            }
-                                            onMouseMove={(e) =>
-                                                setTooltip({
-                                                    visible: true,
-                                                    x: e.clientX,
-                                                    y: e.clientY,
-                                                })
-                                            }>
+                                        // <div className="mt-6 cursor-pointer relative"
+
+                                        //     >
                                                 <figure
-                                                    draggable
+                                                    
                                                     className="ct-media-container"
                                                     style={{ cursor: "grab" }}
 
@@ -403,29 +390,9 @@
                                                     `}
                                                 />
                                             </figure>
-                                            {tooltip.visible && (
-                                                <div
-                                                    className="
-                                                        fixed
-                                                        z-50
-                                                        bg-[#2872fa]
-                                                        text-white
-                                                        text-xs
-                                                        px-3
-                                                        py-2
-                                                        rounded
-                                                        pointer-events-none
-                                                        whitespace-nowrap
-                                                        transition"
-                                                    style={{
-                                                        top: tooltip.y + 15,
-                                                        left: tooltip.x + 15,
-                                                    }}>
-                                                    Click to zoom image
-                                                </div>
-                                            )}
+                                       
                                             
-                                        </div>
+                                        // </div>
                                     )
                                 }
                                 {
@@ -458,7 +425,7 @@
                                         </div>
                                     )
                                 }
-                            </div>
+                            {/* </div> */}
 
                             <div className="mt-6">
                                 <h1 className='text-3xl font-bold'>{perproduct}</h1>
