@@ -295,11 +295,11 @@
                                             draggable
                                             className="ct-media-container"
                                             style={{ cursor: "grab" }}
-
+                                            data-cim-phase="Final Coat"
                                             data-src={passedProduct.image_url}
                                             data-width="400"
                                             data-height="400"
-                                            data-cim-url={passedProduct.image_url}
+                                            data-cim-url="https://fusionedge.instawp.site/wp-content/uploads/2026/06/Matt-Gold.png"
                                             data-cim-kind={passedProduct.category ?? ""}
                                             data-cim-name={passedProduct.product_name}
                                             data-cim-price={passedProduct.price}
@@ -342,11 +342,11 @@
                                                     draggable
                                                     className="ct-media-container"
                                                     style={{ cursor: "grab" }}
-
+                                                    data-cim-phase="Final Coat"
                                                     data-src={passedProduct.image_url}
                                                     data-width="400"
                                                     data-height="400"
-                                                    data-cim-url={passedProduct.image_url}
+                                                    data-cim-url="https://fusionedge.instawp.site/wp-content/uploads/2026/06/Matt-Gold.png"
                                                     data-cim-kind={passedProduct.category ?? ""}
                                                     data-cim-name={passedProduct.product_name}
                                                     data-cim-price={passedProduct.price}
