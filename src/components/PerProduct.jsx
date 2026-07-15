@@ -291,6 +291,18 @@
             loadProductAttributes();
         }, [passedProduct]);
 
+        const createColorImage = (hex, width = 400, height = 400) => {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = hex;
+            ctx.fillRect(0, 0, width, height);
+
+            return canvas.toDataURL("image/png");
+        }
+
         return (
             <>
                 <ButtonFloater page={{
@@ -470,6 +482,14 @@
                                                     onClick={() => {
                                                         setVariant(item);
                                                         // console.log(item);
+
+                                                         setProductAttributes(prev => ({
+                                                            ...prev,
+                                                            "data-cim-color-code": item.hex,
+                                                        }));
+
+                                                        const image = createColorImage(item.hex);
+                                                        setImgSource(image);
                                                     }}
                                                     title={`${item.name} (${item.code})`}
                                                     className={`
@@ -495,7 +515,11 @@
                                             ))}
                                             <button
                                                 type="button"
-                                                onClick={() => setVariant(null)}
+                                                // onClick={() => setVariant(null)}
+                                                onClick={() => {
+                                                    setImgSource(passedProduct?.image_url)
+                                                }}
+                                                
                                                 title="Show Product Image"
                                                 className={`
                                                     w-12
