@@ -24,7 +24,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { style } from 'framer-motion/client';
-
+import { supabase } from "./supabase";
 
 export default function Products() {
     const { isMobile } = useScreen();
@@ -42,6 +42,7 @@ export default function Products() {
     const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
@@ -62,6 +63,148 @@ export default function Products() {
             slider.scrollLeft + slider.clientWidth < slider.scrollWidth - 1
         );
     };
+
+    async function fetchData() {
+        setIsLoading(true);
+
+        const [
+            { data: products, error: productError },
+            { data: attributes, error: attributesError },
+            { data: values, error: valuesError }
+        ] = await Promise.all([
+            supabase
+                .from("product")
+                .select("*")
+                .eq("status", "published"),
+
+            supabase
+                .from("product_attribute")
+                .select("*"),
+
+            supabase
+                .from("product_attribute_value")
+                .select("*")
+        ]);
+
+        if (
+            productError ||
+            attributesError ||
+            valuesError
+        ) {
+            console.error(
+                productError ||
+                attributesError ||
+                valuesError
+            );
+
+            setIsLoading(false);
+            return;
+        }
+
+        // Create attribute lookup
+        const attributeMap = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name == "brand")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        const finishMap = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name == "finish")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        const attr_id = Object.fromEntries(
+            attributes
+                .filter(attr => attr.name == "Color Variation")
+                .map(attr => [
+                    attr.product_id,
+                    attr
+                ])
+        );
+
+        // Create value lookup
+        const valueMap = Object.fromEntries(
+            values.map(value => [
+                value.attribute_id,
+                value
+            ])
+        );
+
+
+        const filteredDatas = products.map(product => {
+            const brandAttribute = attributeMap[product.id];
+            const finishAttribute = finishMap[product.id];
+            const idAttribute = attr_id[product.id];
+
+            const attr = brandAttribute
+                ? valueMap[brandAttribute.id]
+                : null;
+
+            const vals = finishAttribute
+                ? valueMap[finishAttribute.id]
+                : null;
+
+            const attrid = idAttribute
+                ? valueMap[idAttribute.id]
+                : null;   
+
+            return {
+                ...product,
+                brand: attr?.value ?? null,
+                finish: vals?.value ?? null,
+                attr_id: attrid?.id ?? null,
+                prod_attr_id: attrid?.attribute_id ?? null
+            };
+        });
+
+        const dt = filteredDatas.filter(f => f.category == ctgry.val);
+
+        setSelectedCategory(ctgry?.val);
+        setFilteredItems(dt);
+        // console.log(dt);
+        // console.log(ctgry);
+
+        // console.log(products);
+        // console.log(attributes);
+        // console.log(values);
+        // console.log('----------');
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        fetchData();
+
+        const channel = supabase
+            .channel("product-changes")
+            .on(
+            "postgres_changes",
+            {
+                event: "UPDATE",
+                schema: "public",
+                table: "product",
+            },
+            (payload) => {
+                // console.log("Product updated:", payload);
+
+                // Status changed to published
+                if (payload.new.status === "published") {
+                fetchData();
+                }
+            }
+            )
+            .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+    }, []);
     
     useEffect(() => {
         const slider = categorySliderRef.current;
@@ -87,21 +230,21 @@ export default function Products() {
         setSelectedCategory(ctgry?.val);
     }
     
-    useEffect(() => {
-        if (ctgry?.val) {
-            let filtered = [];
+    // useEffect(() => {
+    //     if (ctgry?.val) {
+    //         let filtered = [];
 
-            if(ctgry?.val != "all") {
-                filtered = items.filter((item) => item.category == ctgry?.val);
-            } else {
-                filtered = items;
-            }
-            // console.log(ctgry);
-            // console.log(filtered);
-            setSelectedCategory(ctgry?.val);
-            setFilteredItems(filtered);
-        }
-    }, [cat])
+    //         if(ctgry?.val != "all") {
+    //             filtered = items.filter((item) => item.category == ctgry?.val);
+    //         } else {
+    //             filtered = items;
+    //         }
+    //         // console.log(ctgry);
+    //         // console.log(filtered);
+    //         setSelectedCategory(ctgry?.val);
+    //         setFilteredItems(filtered);
+    //     }
+    // }, [cat])
 
     const scroll = (ref, direction) => {
         const container = ref.current;
@@ -244,7 +387,24 @@ export default function Products() {
                                     )}
                                 </div>
                             </div>
-                            <Items filteredItems={filteredItems}/>  
+                            {
+                                isLoading ? (
+                                    <div className="flex space-x-2 justify-center items-center h-50">
+                                        <div className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"></div>
+                                        <div
+                                            className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"
+                                            style={{ animationDelay: "0.1s" }}> 
+                                                
+                                            </div>
+                                        <div
+                                            className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"
+                                            style={{ animationDelay: "0.3s" }}>
+                                        </div>
+                                    </div>
+                                ) : (
+                                     <Items filteredItems={filteredItems}/>  
+                                )
+                            }
                         </div>
                     </div>
                 </div>
