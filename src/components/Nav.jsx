@@ -27,6 +27,10 @@ export default function Nav() {
                 Shop
             </Link>
 
+            <Link to="https://fusionedge.instawp.site/shop/" className='text-sm font-medium hover:text-[#265bbd] hover:scale-115 transition-all duration-300 ease-in-out'>
+                FusionEdge V1
+            </Link>
+
             <VscAccount className="cursor-pointer text-2xl hover:text-[#265bbd] hover:scale-125 transition-all duration-300 ease-in-out"/>
         </div>
 
@@ -57,6 +61,12 @@ export default function Nav() {
         </div>
 
         <div className="flex flex-col p-5 gap-5">
+          <Link
+            to="https://fusionedge.instawp.site/shop/"
+            onClick={() => setOpenMenu(false)}
+            className="text-sm font-medium hover:text-blue-600">
+            <span className='text-xl font-semibold'>FusionEdge V1</span>
+          </Link>
           <Link
             to="/account"
             onClick={() => setOpenMenu(false)}
