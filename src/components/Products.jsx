@@ -22,16 +22,15 @@ export default function Products() {
     const { isMobile } = useScreen();
     const { brand } = useParams();
     const location = useLocation();
-    // const company = location.state?.company;
     const [selectedBrand, setSelectedBrand] = useState(location.state?.dt);
     const [filteredItems, setFilteredItems] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDrawer, setShowDrawer] = useState(false);
     const [showViewer, setShowViewer] = useState(false);
     const [filteredStore, setFilteredStore] = useState([]);
-    // const filteredCompany = companies.filter(f => f.id != selectedBrand.id);
     const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
@@ -134,8 +133,9 @@ export default function Products() {
                 };
         });
         // console.log(filteredData);
+        setAllProducts(filteredData);      
+        setFilteredItems(filteredData);   
         setFilteredStore(filteredData);
-        setFilteredItems(filteredData);
         setIsLoading(false);
     }
 
@@ -167,23 +167,6 @@ export default function Products() {
             };
     }, []);
 
-    // useEffect(() => {
-    //     async function fetchData() {
-    //         setIsLoading(true);
-    //         const result = await supabase
-    //             .from("product")selectedBrand
-    //             .select("*")
-    //             .eq("status", "published");
-
-    //         const dt = result.data.filter(f => f.brand == selectedBrand.val);
-    //         console.log(dt);
-    //         setFilteredItems(dt);
-    //         setIsLoading(false);
-    //     }
-
-    //     fetchData();
-    // }, []);
-
     useEffect(() => {
         const slider = categorySliderRef.current;
 
@@ -201,15 +184,16 @@ export default function Products() {
     }, []);
 
     const filterByCategory = (cat) => {
-        const filtered = items.filter((item) =>
-            item.company === brand &&
-            (cat.val === "all" || item.category === cat.val)
+        const filtered = allProducts.filter(item =>
+            cat.val == "all" || item.category === cat.val
         );
+
         setFilteredItems(filtered);
         setSelectedCategory(cat.val);
-    }
+    };
     
     // useEffect(() => {
+
     //     if (brand) {
     //         let filtered = [];
             
@@ -218,7 +202,7 @@ export default function Products() {
     //         } else {
     //             filtered = items.filter((item) => item.brand == brand);
     //         }
-    //         console.log(items);
+
     //         setFilteredItems(filtered);
     //     }
     // }, [brand])

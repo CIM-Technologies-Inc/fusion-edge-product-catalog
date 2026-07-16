@@ -213,10 +213,14 @@ export default function Shop() {
         const filteredStore = [
             ...new Map(
                 filteredData
-                .filter(item => item.Store != null && item.Store !== "")
+                .filter(item =>
+                    item.Store?.trim() &&
+                    item.brand?.trim()
+                )
                 .map(item => [item.Store, item])
             ).values()
         ];
+        // console.log(filteredStore);
         setBrands(filteredStore);
 
         setData(filteredData);
@@ -293,20 +297,6 @@ export default function Shop() {
         return () => clearTimeout(timeoutRef.current);
     }, []);
 
-    // const scroll = (direction) => {
-    //     const container = sliderRef.current;
-
-    //     if (!container) return;
-
-    //     const scrollAmount = 300;
-
-    //     container.scrollBy({
-    //         left: direction === "left"
-    //             ? -scrollAmount
-    //             : scrollAmount,
-    //         behavior: "smooth",
-    //     });
-    // };
 
     const scroll = (ref, direction) => {
         const container = ref.current;
@@ -498,7 +488,7 @@ export default function Shop() {
                     {brands.map((dt, ccindx) => (
                         <Link
                             key={`bbb-${ccindx}`}
-                            to={`/shop/${dt.brand}`}
+                            to={`/shop/${dt.Store}`}
                             state={{ dt }}
                             className="shrink-0">
                             <div

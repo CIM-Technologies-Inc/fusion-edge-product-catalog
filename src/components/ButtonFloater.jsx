@@ -17,7 +17,7 @@ export default function ButtonFloater({ page }) {
     const [openCategories, setOpenCategories] = useState(false);
     const [openCompanies, setOpenCompanies] = useState(false);
 
-    console.log(page);
+    // console.log(page);
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -225,8 +225,8 @@ export default function ButtonFloater({ page }) {
                             {menuItems.map((store) => (
                                 <Link
                                     key={store.id}
-                                    to={`/shop`}
-                                    state={{ store }}
+                                    to={`/shop/${store.Store}`}
+                                    state={{dt: store}}
                                 >
                                     <div className="flex items-center py-2 hover:text-blue-600 cursor-pointer">
                                         <img
@@ -261,42 +261,7 @@ export default function ButtonFloater({ page }) {
                         shadow-xl">
                     <TiThList className="text-xl" />
                 </button>
-            {/* {page.showCompanyButton ? (
-                <button
-                    onClick={() => setOpenMenu(!openMenu)}
-                    className="
-                        mb-1
-                        bg-[#2c539b]
-                        hover:bg-[#073998]
-                        text-white
-                        rounded-full
-                        p-5
-                        cursor-pointer
-                        transition-all
-                        duration-300
-                        hover:scale-110
-                        shadow-xl">
-                    <TiThList className="text-xl" />
-                </button>
-            ) : (
-                <button
-                    onClick={() => setOpenMenu(!openMenu)}
-                    className="
-                        mb-1
-                        bg-[#2c539b]
-                        hover:bg-[#073998]
-                        text-white
-                        rounded-full
-                        p-5
-                        cursor-pointer
-                        transition-all
-                        duration-300
-                        hover:scale-110
-                        shadow-xl">
-                    <MdOutlineCategory className="text-xl" />
-                </button>
-            )} */}
-        </div>
+            </div>
         </>
     )
 }

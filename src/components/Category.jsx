@@ -33,6 +33,7 @@ export default function Products() {
     const ctgry = location.state?.cat;
     const [currentCategory, setCurrentCategory] = useState(location.state?.cat);
     const [filteredItems, setFilteredItems] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -43,7 +44,7 @@ export default function Products() {
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    // console.log(currentCategory);
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
 
@@ -164,10 +165,12 @@ export default function Products() {
             };
         });
 
+        setAllProducts(filteredDatas);
         const dt = filteredDatas.filter(f => f.category.toLowerCase() == ctgry.val);
 
         setSelectedCategory(ctgry?.val);
         setFilteredItems(dt);
+        
         // console.log(dt);
         // console.log(ctgry);
 
@@ -223,29 +226,15 @@ export default function Products() {
     }, []);
 
     const filterByCategory = (ctgry) => {
-        const filtered = items.filter((item) =>
-            item.category == ctgry?.val || ctgry?.val == "all" 
+        const filtered = allProducts.filter(item =>
+            ctgry.val === "all" ||
+            item.category.toLowerCase() === ctgry.val.toLowerCase()
         );
+
         setFilteredItems(filtered);
-        setSelectedCategory(ctgry?.val);
+        setSelectedCategory(ctgry.val);
     }
     
-    // useEffect(() => {
-    //     if (ctgry?.val) {
-    //         let filtered = [];
-
-    //         if(ctgry?.val != "all") {
-    //             filtered = items.filter((item) => item.category == ctgry?.val);
-    //         } else {
-    //             filtered = items;
-    //         }
-    //         // console.log(ctgry);
-    //         // console.log(filtered);
-    //         setSelectedCategory(ctgry?.val);
-    //         setFilteredItems(filtered);
-    //     }
-    // }, [cat])
-
     const scroll = (ref, direction) => {
         const container = ref.current;
 

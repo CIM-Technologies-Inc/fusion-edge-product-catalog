@@ -282,9 +282,8 @@
                     // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
                 });
-                console.log(result)
-                setProductAttributes(result);
 
+                setProductAttributes(result);
             } catch (err) {
                 console.error(err);
             }
@@ -327,13 +326,21 @@
                                 },
                                 {
                                     label: passedProduct.brand,
-                                    to: `/shop`,
-                                    state: { passedProduct },
+                                    to: `/shop/${passedProduct.brand}`,
+                                    state: {
+                                        dt: passedProduct,
+                                    },
                                 },
                                 {
                                     label: "Category",
-                                    to: `/shop`,
-                                    state: { passedProduct },
+                                    to: `/shop/category`,
+                                    state: { 
+                                        cat: {
+                                            id: passedProduct.id,
+                                            text: passedProduct.category.charAt(0).toUpperCase() + passedProduct.category.slice(1).toLowerCase(),
+                                            val: passedProduct.category,
+                                        }
+                                    },
                                 },
                                 // {
                                 //     label: passedProduct.finish,
