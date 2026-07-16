@@ -327,12 +327,12 @@
                                 },
                                 {
                                     label: passedProduct.brand,
-                                    to: `/shop/${passedProduct.brand}`,
+                                    to: `/shop`,
                                     state: { passedProduct },
                                 },
                                 {
                                     label: "Category",
-                                    to: `/shop/${passedProduct.category}`,
+                                    to: `/shop`,
                                     state: { passedProduct },
                                 },
                                 // {
