@@ -734,10 +734,11 @@
                                     
                                     <p className='text-sm font-semibold text-gray-700 leading-7'>BRAND : <span className='text-gray-400 uppercase'>{passedProduct.brand}</span></p>
                                 </div>
-                                <hr className="border-gray-300 my-4" />
+                                
                                 {
                                     passedProduct?.description && passedProduct.description != '' && (
                                         <>
+                                            <hr className="border-gray-300 my-4" />
                                             <div className={`flex justify-between cursor-pointer ${ showDescription ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowDescription(prev => !prev);}}>
                                                 <span className='text-xs hover:text-blue-500 cursor-pointer'>DESCRIPTION</span>
                                                 {
