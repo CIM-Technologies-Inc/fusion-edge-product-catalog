@@ -71,7 +71,7 @@
 
         
         // console.log(brands);
-        // console.log(passedProduct);
+        console.log(passedProduct);
         // console.log('------');
 
         const parsedSample = passedProduct?.sample_json
@@ -277,10 +277,13 @@
                 });
 
                 const result = {};
-
+                console.log(attributes);
                 attributes.forEach(attr => {
                     // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
+                    if(attr.name == 'url') {
+                        result['data-src'] = valueMap[attr.id] ?? null;
+                    }
                 });
 
                 setProductAttributes(result);
@@ -332,7 +335,7 @@
                                     },
                                 },
                                 {
-                                    label: "Category",
+                                    label: passedProduct.category,
                                     to: `/shop/category`,
                                     state: { 
                                         cat: {
@@ -408,7 +411,7 @@
                             <figure
                                 className="ct-media-container"
                                 style={{ cursor: "grab" }}
-                                data-src={passedProduct.image_url}
+                                // data-src={passedProduct.image_url}
                                 data-width="400"
                                 data-height="400"
                                 {...productAttributes}>
