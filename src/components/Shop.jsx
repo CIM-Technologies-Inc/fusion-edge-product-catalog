@@ -32,6 +32,7 @@ export default function Shop() {
     const [canScrollCompanyRight, setCanScrollCompanyRight] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [data, setData] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const updateCategoryArrows = () => {
@@ -203,11 +204,20 @@ export default function Shop() {
         });
 
 
-        console.log(filteredData);
+        // console.log(filteredData);
         // console.log(products);
         // console.log(attributes);
         // console.log(values);
         // console.log('----------');
+
+        const filteredStore = [
+            ...new Map(
+                filteredData
+                .filter(item => item.Store != null && item.Store !== "")
+                .map(item => [item.Store, item])
+            ).values()
+        ];
+        setBrands(filteredStore);
 
         setData(filteredData);
         setIsLoading(false);
@@ -379,7 +389,7 @@ export default function Shop() {
 
     return (
         <>
-            <ButtonFloater />
+            {/* <ButtonFloater /> */}
             <Breadcrumb items={[{ label: 'Shop'}]}/>
             {/* <div className="flex">
                 <Link to="/">
@@ -467,7 +477,7 @@ export default function Shop() {
                 )}
             </div>
 
-            <h1 className={`${isMobile ? 'text-xl pt-2' : 'text-3xl pt-4'} font-bold`}>Company</h1>
+            <h1 className={`${isMobile ? 'text-xl pt-2' : 'text-3xl pt-4'} font-bold`}>Store</h1>
           
             <div className="flex items-center">
                 {canScrollCompanyLeft && (
@@ -480,51 +490,56 @@ export default function Shop() {
                 <div
                     ref={sliderRef}
                     className={`
-                    ${!isMobile ? 'py-6' : ''}
+                    ${!isMobile ? 'py-6 gap-4' : 'py-6 gap-3'}
                     flex
-                    gap-6
                     overflow-x-hidden
                     scroll-smooth
                     flex-1`}>
-                    {companies.map((company, ccindx) => (
+                    {brands.map((dt, ccindx) => (
                         <Link
                             key={`bbb-${ccindx}`}
-                            to={`/shop/${company.val}`}
-                            state={{ company }}
+                            to={`/shop/${dt.brand}`}
+                            state={{ dt }}
                             className="shrink-0">
                             <div
-                                onClick={() => selectCompany(company)}
+                                onClick={() => selectCompany(dt)}
                                 className={`
-                                    ${!isMobile ? 'p-6 w-52' : 'mt-6'}
+                                    ${!isMobile ? 'w-29 h-29' : 'w-35 h-35'}
                                     shadow-lg
                                     cursor-pointer
-                                    
-                                    bg-white
+                                    flex
+                                    flex-col
+                                    justify-center
+                                    items-center
                                     rounded-xl
                                     transition-all
                                     duration-300
-                                    hover:-translate-y-2
+                                    flex-shrink-0
+                                    hover:-translate-y-2 
                                     hover:shadow-xl`}>
                                 <img
-                                    src={company.src}
-                                    alt={company.name}
+                                    src={new URL(`../assets/img/store.png`,import.meta.url).href}
+                                    alt={dt.Store}
                                     className="w-full h-20 object-contain"
                                 />
-                                {
+                                <h2 className="text-sm text-center mt-1 font-semibold">
+                                    {dt.Store}
+                                </h2>
+                                {/* {
                                     !isMobile && (
                                         <h2 className="text-xl text-center font-bold mt-2">
-                                            {company.name}
+                                            {dt.Store}
                                         </h2>
                                     )
-                                }
+                                } */}
                             </div>
-                             {
+                            {/* {
                                 isMobile && (
                                     <h2 className="text-sm text-center mt-1 font-semibold">
-                                        {company.name}
+                                        {dt.Store}
                                     </h2>
                                 )
-                            }
+                            } */}
                         </Link>
                     ))}
                 </div>

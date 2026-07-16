@@ -62,15 +62,17 @@
         const { perproduct } = useParams();
         const location = useLocation();
         const passedProduct = location.state?.item;
-        const productDetails = items.filter(f => f.id == passedProduct.id);
+        const brands = location.state?.brands;
+        // const productDetails = items.filter(f => f.id == passedProduct.id);
         const relatedProduct = items.filter(f => f.company == passedProduct.company && f.id != passedProduct.id);
-        const com = location.state?.currentCompany;
         const company = companies.filter(f => f.val == passedProduct.brand)[0];
         const [imgSource, setImgSource] = useState(passedProduct.image_url);
         const [productAttributes, setProductAttributes] = useState({});
 
-        // console.log(location.state);
+        
+        // console.log(brands);
         // console.log(passedProduct);
+        // console.log('------');
 
         const parsedSample = passedProduct?.sample_json
             ? JSON.parse(passedProduct.sample_json)
@@ -212,6 +214,7 @@
 
                 return obj;
             }, {});
+
             setAttributes(result);
         };
 
@@ -279,7 +282,7 @@
                     // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
                 });
-
+                console.log(result)
                 setProductAttributes(result);
 
             } catch (err) {
@@ -306,9 +309,10 @@
         return (
             <>
                 <ButtonFloater page={{
-                ...location,
-                showCompanyButton: false
-            }}/>
+                    ...location,
+                    showCompanyButton: false,
+                    stores: []
+                }}/>
                 <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
                     <div className={`${isMobile ? 'pl-8 pr-8': 'pl-40 pr-40'}`}>
                         <Fusion />
@@ -322,25 +326,25 @@
                                     to: "/shop",
                                 },
                                 {
-                                    label: com.product_name,
-                                    to: `/shop/${com.val}`,
-                                    state: { company },
+                                    label: passedProduct.brand,
+                                    to: `/shop/${passedProduct.brand}`,
+                                    state: { passedProduct },
                                 },
                                 {
                                     label: "Category",
-                                    to: `/shop/${com.val}`,
-                                    state: { company },
+                                    to: `/shop/${passedProduct.category}`,
+                                    state: { passedProduct },
                                 },
-                                {
-                                    label: passedProduct.finish,
-                                    to: `/shop/${com.val}`,
-                                    state: {
-                                        company: {
-                                        ...company,
-                                        filterBy: passedProduct.category,
-                                        },
-                                    },
-                                },
+                                // {
+                                //     label: passedProduct.finish,
+                                //     to: `/shop/${passedProduct.brand}`,
+                                //     state: {
+                                //         company: {
+                                //         ...company,
+                                //         filterBy: passedProduct.category,
+                                //         },
+                                //     },
+                                // },
                                 {
                                     label: perproduct,
                                 },

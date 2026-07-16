@@ -164,7 +164,7 @@ export default function Products() {
             };
         });
 
-        const dt = filteredDatas.filter(f => f.category == ctgry.val);
+        const dt = filteredDatas.filter(f => f.category.toLowerCase() == ctgry.val);
 
         setSelectedCategory(ctgry?.val);
         setFilteredItems(dt);
@@ -261,8 +261,8 @@ export default function Products() {
         <>
             <ButtonFloater page={{
                 ...location,
-                showCompanyButton: true,
-                // companies: filteredCompany
+                showCompanyButton: false,
+                stores: []
             }}/>
             <div className="min-h-screen flex flex-col">
                 <div className="flex-1">
@@ -402,7 +402,9 @@ export default function Products() {
                                         </div>
                                     </div>
                                 ) : (
-                                     <Items filteredItems={filteredItems}/>  
+                                    <div className='mt-12'>
+                                        <Items filteredItems={filteredItems}/>  
+                                    </div>
                                 )
                             }
                         </div>

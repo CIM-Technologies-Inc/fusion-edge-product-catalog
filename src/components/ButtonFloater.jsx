@@ -17,7 +17,7 @@ export default function ButtonFloater({ page }) {
     const [openCategories, setOpenCategories] = useState(false);
     const [openCompanies, setOpenCompanies] = useState(false);
 
-    // console.log(page);
+    console.log(page);
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -58,10 +58,10 @@ export default function ButtonFloater({ page }) {
         if(!page) return;
 
         if(page.showCompanyButton) {
-            setMenuItems(page.companies);
+            setMenuItems(page.stores);
         } else {
-            const category = page.state.currentCompany.category;
-            setMenuItems(category);
+            // const category = page.state.item.category;
+            // setMenuItems(category);
         }
     }, [page])
 
@@ -122,42 +122,6 @@ export default function ButtonFloater({ page }) {
                         : "opacity-0 scale-95 translate-y-2 pointer-events-none"
                     }
                 `}>
-                {/* <Link to="/shop">
-                    <button 
-                        onClick={() => {
-                            window.scrollTo({
-                                top: 0,
-                                behavior: "smooth"
-                            });
-                        }}
-                        className="flex items-center cursor-pointer w-full text-left px-4 py-3 hover:bg-gray-100 transition">
-                        <MdOutlineShoppingCart className="mr-3"/>
-                        <span>Shop</span>
-                    </button>
-                </Link> */}
-
-                {/* {menuItems.length > 0 && (
-                    menuItems.map((comp, compindx) => (
-                        <Link key={`ccc-${compindx}`}  to={page.showCompanyButton ? `/shop/${comp.val}` : '/shop'} state={page.showCompanyButton ? { company: comp } : {}}>
-                            <button
-                                onClick={() => {
-                                    window.scrollTo({
-                                        top: 0,
-                                        behavior: "smooth"
-                                    });
-                                }}
-                                className="cursor-pointer flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 transition">
-                                {   page.showCompanyButton
-                                    ?
-                                    <PiBuildings className="mr-3"/>
-                                    :
-                                    <MdOutlineCategory className="mr-3"/>
-                                }
-                                <span>{page.showCompanyButton ? comp.name : comp.text}</span>
-                            </button>
-                        </Link>
-                    ))
-                )} */}
                 <div className="">
                     <button
                         onClick={() => {
@@ -218,8 +182,9 @@ export default function ButtonFloater({ page }) {
                         </div>
                     </div>
                 </div>
-
-                <div>
+                {
+                    page.showCompanyButton && (
+                         <div>
                     <button
                         onClick={() => {
                             setOpenCompanies(prev => {
@@ -247,6 +212,7 @@ export default function ButtonFloater({ page }) {
                         />
                     </button>
 
+                                
                     <div
                         className={`
                             overflow-hidden
@@ -256,25 +222,28 @@ export default function ButtonFloater({ page }) {
                             ${openCompanies ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
                         `}>
                         <div className="pl-8 pb-2">
-                            {companies.map((company) => (
+                            {menuItems.map((store) => (
                                 <Link
-                                    key={company.id}
-                                    to={`/shop/${company.val}`}
-                                    state={{ company }}
+                                    key={store.id}
+                                    to={`/shop`}
+                                    state={{ store }}
                                 >
                                     <div className="flex items-center py-2 hover:text-blue-600 cursor-pointer">
                                         <img
-                                            src={company.src}
-                                            alt={company.product_name}
+                                            src={new URL(`../assets/img/store.png`,import.meta.url).href}
+                                            alt={store.Store}
                                             className="w-8 h-8 object-contain mr-4 rounded-md"
                                         />
-                                        {company.product_name}
+                                        {store.Store}
                                     </div>
                                 </Link>
                             ))}
                         </div>
                     </div>
                 </div>
+                    )
+                }
+               
             </div>
                 <button
                     onClick={() => setOpenMenu(!openMenu)}

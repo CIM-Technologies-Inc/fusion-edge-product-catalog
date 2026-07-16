@@ -18,7 +18,10 @@ export default function Items({filteredItems}) {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedDetails, setSelectedDetails] = useState([]);
     const { isMobile } = useScreen();
+    // const filteredBrand = [...new Map(filteredItems.map(item => [item.Store, item])).values()];
+    // console.log(filteredBrand);
     // console.log(filteredItems);
+    // console.log('----------');
     return (
         <>
             <div className="mb-6 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-x-10 gap-y-12 mt-2">
@@ -49,7 +52,8 @@ export default function Items({filteredItems}) {
                                        >
                                     <Link
                                         to={item.brand ? `/shop/${item.brand}/${item.product_name}` : "#"}
-                                        state={{ item: item, currentCompany: company }}
+                                        // state={{ item: item, currentCompany: item.brand }}
+                                        state={{ item: item, brands: filteredItems }}
                                         className="flex flex-col grow"
                                         onClick={(e) => {
                                             if (!item.brand) {
