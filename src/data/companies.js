@@ -36,6 +36,8 @@ export const companies = [
             {id: 2, text: 'Flooring', val: 'flooring'},
             {id: 3, text: 'Construction', val: 'construction'},
             {id: 4, text: 'Walls', val: 'wall'},
+
+            
             {id: 5, text: 'Windows', val: 'window'},
         ]},
         { id: 4, product_name: 'Saigres', val: 'Saigres', src: img3, category: [

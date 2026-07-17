@@ -163,19 +163,7 @@ export default function Items({filteredItems}) {
                     }
                 </AnimatePresence>
             </div>
-            {/* <div className="flex justify-between flex-wrap mt-6 gap-4">
-                {items.map((item, indx) => (
-                    <div className='cursor-pointer w-40'>
-                        <img
-                            src={item.src}
-                            alt={item.name}
-                            className="w-full h-40 object-contain"
-                        />
-                        <span className='block text-center pt-6'>{item.name}</span>
-                        <p className='text-center pt-4 uppercase text-xs'>{item.category}</p>
-                    </div>
-                ))}
-            </div> */}
+   
 
             {/* DRAWER */}
             <Drawer
