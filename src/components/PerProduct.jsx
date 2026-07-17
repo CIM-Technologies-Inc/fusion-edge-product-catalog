@@ -277,14 +277,17 @@
                 });
 
                 const result = {};
-                console.log(attributes);
+                console.log('passedProduct:', passedProduct);
+
                 attributes.forEach(attr => {
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
                     if(attr.name == 'url') {
-                        result['data-image-url'] = valueMap[attr.id] ?? null;
+                        const imageUrl = passedProduct?.['image_url'] ?? null;
+                        result['data-cim-url'] = imageUrl;
+                        result['data-src'] = valueMap[attr.id] ?? null;
                     }
                 });
-
+                console.log('test the result', result);
                 setProductAttributes(result);
             } catch (err) {
                 console.error(err);
