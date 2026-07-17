@@ -279,10 +279,9 @@
                 const result = {};
                 console.log(attributes);
                 attributes.forEach(attr => {
-                    // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
                     if(attr.name == 'url') {
-                        result['data-src'] = valueMap[attr.id] ?? null;
+                        result['data-image-url'] = valueMap[attr.id] ?? null;
                     }
                 });
 
