@@ -51,24 +51,24 @@ export default function Items({filteredItems}) {
                                         h-full`}
                                        >
                                     <Link
-                                        to={item.brand ? `/shop/${item.brand}/${item.product_name}` : "#"}
-                                        // state={{ item: item, currentCompany: item.brand }}
+                                        // to={item.brand ? `/shop/${item.brand}/${item.product_name}` : "#"}
+                                        to={`/shop/${item.brand || 'product'}/${item.product_name}`}
                                         state={{ item: item, brands: filteredItems }}
                                         className="flex flex-col grow"
-                                        onClick={(e) => {
-                                            if (!item.brand) {
-                                                e.preventDefault();
+                                        onClick={() => {
+                                            // if (!item.brand) {
+                                            //     e.preventDefault();
 
-                                                // Show notification here
-                                                Swal.fire({
-                                                    title: 'Warning!',
-                                                    text: "This product doesn't have a brand!",
-                                                    icon: 'warning',
-                                                    confirmButtonText: 'OK'
-                                                })
-                                                // alert("This product doesn't have a brand.");
-                                                return;
-                                            }
+                                            //     // Show notification here
+                                            //     Swal.fire({
+                                            //         title: 'Warning!',
+                                            //         text: "This product doesn't have a brand!",
+                                            //         icon: 'warning',
+                                            //         confirmButtonText: 'OK'
+                                            //     })
+                                            //     // alert("This product doesn't have a brand.");
+                                            //     return;
+                                            // }
 
                                             window.scrollTo({
                                                 top: 0,
