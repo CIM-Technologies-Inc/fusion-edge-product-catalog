@@ -38,7 +38,7 @@ export const companies = [
             {id: 4, text: 'Walls', val: 'wall'},
             {id: 5, text: 'Windows', val: 'window'},
         ]},
-        { id: 4, product_name: 'Saigres', val: 'Saigres', src: img3, category: [
+        { id: 5, product_name: 'Saigres', val: 'Saigres', src: img3, category: [
             {id: 0, text: 'All', val: 'all'},
             {id: 1, text: 'Furniture', val: 'furniture'},
             {id: 2, text: 'Flooring', val: 'flooring'},
