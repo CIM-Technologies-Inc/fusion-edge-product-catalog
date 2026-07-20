@@ -1,6 +1,6 @@
 export const category = [
     {id: 1, text: 'All', val: 'all'},
-    {id: 2, text: 'Autodesk', val: 'autodesk'},
+    // {id: 2, text: 'Autodesk', val: 'autodesk'},
     // {id: 2, text: 'Material', val: 'material', isGeneral: true},
     {id: 3, text: 'Tile', val: 'tile'},
     {id: 4, text: 'Paint', val: 'paint'},
