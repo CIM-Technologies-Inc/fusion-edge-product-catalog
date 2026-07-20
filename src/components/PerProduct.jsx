@@ -277,15 +277,25 @@
                 });
 
                 const result = {};
-                // console.log(attributes);
+     
+
                 attributes.forEach(attr => {
-                    // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
                     if(attr.name == 'url') {
+                        const imageUrl = passedProduct?.['image_url'] ?? null;
+                        result['data-cim-url'] = imageUrl;
                         result['data-src'] = valueMap[attr.id] ?? null;
                     }
+                    // if (attr.name == 'rfa') {
+                    //     result['data-cim-url'] = valueMap[attr.id] ?? null;
+                        
+                    // }
                 });
-
+                const rfaAttr = attributes.find(a => a.name === 'rfa');
+                if (rfaAttr) {
+                    result['data-cim-url'] = valueMap[rfaAttr.id] ?? null;
+                }
+                console.log('test the result', result);
                 setProductAttributes(result);
             } catch (err) {
                 console.error(err);
