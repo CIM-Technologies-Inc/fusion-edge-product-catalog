@@ -22,6 +22,7 @@
     import Footer from './Footer.jsx';
     import Fusion from './Fusion.jsx';
     import { supabase } from "./supabase";
+    import { useProducts } from "../context/ProductContext";
 
     export default function PerProduct() {
         const { isMobile } = useScreen();
@@ -62,16 +63,16 @@
         const { perproduct } = useParams();
         const location = useLocation();
         const passedProduct = location.state?.item;
-        const brands = location.state?.brands;
+
         // const productDetails = items.filter(f => f.id == passedProduct.id);
         const relatedProduct = items.filter(f => f.company == passedProduct.company && f.id != passedProduct.id);
         const company = companies.filter(f => f.val == passedProduct.brand)[0];
         const [imgSource, setImgSource] = useState(passedProduct.image_url);
         const [productAttributes, setProductAttributes] = useState({});
-
+        const { brands } = useProducts();
         
         // console.log(brands);
-        console.log(passedProduct);
+        // console.log(passedProduct);
         // console.log('------');
 
         const parsedSample = passedProduct?.sample_json
@@ -152,7 +153,6 @@
           
         }, [quantity])
         
-
         const fetchAttribute = async () => {
             if (!passedProduct?.attr_id) return;
            
@@ -277,7 +277,7 @@
                 });
 
                 const result = {};
-                console.log(attributes);
+                // console.log(attributes);
                 attributes.forEach(attr => {
                     // result[attr.name] = valueMap[attr.id] ?? null;
                     result[`data-cim-${attr.name}`] = valueMap[attr.id] ?? null;
@@ -312,8 +312,9 @@
             <>
                 <ButtonFloater page={{
                     ...location,
-                    showCompanyButton: false,
-                    stores: []
+                    showCategoryButton: true,
+                    showCompanyButton: true,
+                    stores: brands
                 }}/>
                 <div className={`${isMobile ? 'pt-2' : 'pt-6'} mb-14`}>
                     <div className={`${isMobile ? 'pl-8 pr-8': 'pl-40 pr-40'}`}>

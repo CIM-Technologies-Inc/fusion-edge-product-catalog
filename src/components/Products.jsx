@@ -16,7 +16,8 @@ import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
 import Items from './Items'
 import Footer from './Footer.jsx';
-import { supabase } from "./supabase";
+// import { supabase } from "./supabase";
+import { useProducts } from "../context/ProductContext";
 
 export default function Products() {
     const { isMobile } = useScreen();
@@ -30,14 +31,13 @@ export default function Products() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDrawer, setShowDrawer] = useState(false);
     const [showViewer, setShowViewer] = useState(false);
-    const [filteredStore, setFilteredStore] = useState([]);
     const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
-    const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const { data, brands, loading } = useProducts();
 
-    // CONTINUE TO DEVELOP
+    // console.log(data);
     // console.log(selectedBrand);
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
@@ -59,113 +59,131 @@ export default function Products() {
         );
     };
 
-    async function fetchData() {
-        setIsLoading(true);
-
-        const [
-            { data: products, error: productError },
-            { data: attributes, error: attributesError },
-            { data: values, error: valuesError }
-        ] = await Promise.all([
-            supabase
-                .from("product")
-                .select("*")
-                .eq("status", "published"),
-
-            supabase
-                .from("product_attribute")
-                .select("*"),
-
-            supabase
-                .from("product_attribute_value")
-                .select("*")
-        ]);
-
-        if (
-            productError ||
-            attributesError ||
-            valuesError
-        ) {
-            console.error(
-                productError ||
-                attributesError ||
-                valuesError
-            );
-
-            setIsLoading(false);
-            return;
-        }
-
-        // Create attribute lookup
-        const attributeMap = Object.fromEntries(
-            attributes
-                .filter(attr => attr.name == "brand")
-                .map(attr => [
-                    attr.product_id,
-                    attr
-                ])
-        );
-
-        const valueMap = Object.fromEntries(
-            values.map(value => [
-                value.attribute_id,
-                value
-            ])
-        );
-
-        const filteredData = products
-            .filter(product => {
-                const brandAttribute = attributeMap[product.id];
-
-                if (!brandAttribute) return false;
-
-                const attr = valueMap[brandAttribute.id];
-
-                return attr?.value === selectedBrand.brand;
-            })
-            .map(product => {
-                const brandAttribute = attributeMap[product.id];
-                const attr = valueMap[brandAttribute.id];
-
-                return {
-                ...product,
-                brand: attr?.value ?? null,
-                };
-        });
-        // console.log(filteredData);
-        setAllProducts(filteredData);      
-        setFilteredItems(filteredData);   
-        setFilteredStore(filteredData);
-        setIsLoading(false);
-    }
-
     useEffect(() => {
-        fetchData();
+        if (!selectedBrand) return;
 
-        const channel = supabase
-            .channel("product-changes")
-            .on(
-            "postgres_changes",
-            {
-                event: "UPDATE",
-                schema: "public",
-                table: "product",
-            },
-            (payload) => {
-                // console.log("Product updated:", payload);
+        const result = brands.filter(
+            brand => brand.Store == selectedBrand.Store
+        );
 
-                // Status changed to published
-                if (payload.new.status == "published") {
-                fetchData();
-                }
-            }
-            )
-            .subscribe();
+        setAllProducts(result);
+        setFilteredItems(result);
+    }, [brands]);
 
-            return () => {
-                supabase.removeChannel(channel);
-            };
-    }, []);
+    // async function fetchData() {
+    //     setIsLoading(true);
+
+    //     const [
+    //         { data: products, error: productError },
+    //         { data: attributes, error: attributesError },
+    //         { data: values, error: valuesError }
+    //     ] = await Promise.all([
+    //         supabase
+    //             .from("product")
+    //             .select("*")
+    //             .eq("status", "published"),
+
+    //         supabase
+    //             .from("product_attribute")
+    //             .select("*"),
+
+    //         supabase
+    //             .from("product_attribute_value")
+    //             .select("*")
+    //     ]);
+
+    //     if (
+    //         productError ||
+    //         attributesError ||
+    //         valuesError
+    //     ) {
+    //         console.error(
+    //             productError ||
+    //             attributesError ||
+    //             valuesError
+    //         );
+
+    //         setIsLoading(false);
+    //         return;
+    //     }
+
+    //     // Create attribute lookup
+    //     const attributeMap = Object.fromEntries(
+    //         attributes
+    //             .filter(attr => attr.name == "brand")
+    //             .map(attr => [
+    //                 attr.product_id,
+    //                 attr
+    //             ])
+    //     );
+
+    //     const valueMap = Object.fromEntries(
+    //         values.map(value => [
+    //             value.attribute_id,
+    //             value
+    //         ])
+    //     );
+
+    //     const filteredData = products
+    //         .filter(product => {
+    //             const brandAttribute = attributeMap[product.id];
+
+    //             if (!brandAttribute) return false;
+
+    //             const attr = valueMap[brandAttribute.id];
+
+    //             return attr?.value == selectedBrand.brand;
+    //         })
+    //         .map(product => {
+    //             const brandAttribute = attributeMap[product.id];
+    //             const attr = valueMap[brandAttribute.id];
+
+    //             return {
+    //             ...product,
+    //             brand: attr?.value ?? null,
+    //             };
+    //     });
+
+    //     const uniqueStores = [
+    //         ...new Map(
+    //             filteredData
+    //             .filter(item => item.Store != null && item.Store.trim() !== "")
+    //             .map(item => [item.Store, item])
+    //         ).values()
+    //     ];
+    //     // console.log(filteredData);
+    //     setAllProducts(filteredData);      
+    //     setFilteredItems(filteredData);   
+    //     setIsLoading(false);
+    // }
+
+    // useEffect(() => {
+    //     fetchData();
+
+    //     const channel = supabase
+    //         .channel("product-changes")
+    //         .on(
+    //         "postgres_changes",
+    //         {
+    //             event: "UPDATE",
+    //             schema: "public",
+    //             table: "product",
+    //         },
+    //         (payload) => {
+    //             // console.log("Product updated:", payload);
+
+    //             // Status changed to published
+    //             if (payload.new.status == "published") {
+    //             fetchData();
+    //             }
+    //         }
+    //         )
+    //         .subscribe();
+
+    //         return () => {
+    //             supabase.removeChannel(channel);
+    //         };
+    // }, []);
 
     useEffect(() => {
         const slider = categorySliderRef.current;
@@ -185,27 +203,13 @@ export default function Products() {
 
     const filterByCategory = (cat) => {
         const filtered = allProducts.filter(item =>
-            cat.val == "all" || item.category === cat.val
+            cat.val == "all" || item.category == cat.val
         );
 
         setFilteredItems(filtered);
         setSelectedCategory(cat.val);
     };
     
-    // useEffect(() => {
-
-    //     if (brand) {
-    //         let filtered = [];
-            
-    //         if(selectedBrand?.filterBy != undefined) {
-    //             filtered = items.filter((item) => item.brand == brand && item.category == selectedBrand.filterBy);
-    //         } else {
-    //             filtered = items.filter((item) => item.brand == brand);
-    //         }
-
-    //         setFilteredItems(filtered);
-    //     }
-    // }, [brand])
 
     const scroll = (ref, direction) => {
         const container = ref.current;
@@ -213,7 +217,7 @@ export default function Products() {
         if (!container) return;
 
         container.scrollBy({
-            left: direction === "left" ? -300 : 300,
+            left: direction == "left" ? -300 : 300,
             behavior: "smooth",
         });
     };
@@ -222,8 +226,9 @@ export default function Products() {
         <>
             <ButtonFloater page={{
                 ...location,
+                showCategoryButton: true,
                 showCompanyButton: true,
-                stores: filteredStore
+                stores: brands
             }}/>
             <div className="min-h-screen flex flex-col">
                 <div className="flex-1">
@@ -244,7 +249,7 @@ export default function Products() {
                                     <div className="mt-10 text-2xl font-bold text-gray-500">
                                         <div className="flex items-center mr-2">
                                             <PiBuildingsFill className="mr-2 text-[#2c539b]" />
-                                            <h2 className="text-[#2c539b]">{selectedBrand.product_name}</h2>
+                                            <h2 className="text-[#2c539b]">{selectedBrand.Store}</h2>
                                         </div>
                                     </div>
                                 ) : (
@@ -336,7 +341,7 @@ export default function Products() {
                                 </div>
                             </div>
                             {
-                                isLoading ? (
+                                loading ? (
                                     <div className="flex space-x-2 justify-center items-center h-50">
                                         <div className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"></div>
                                         <div

@@ -1,18 +1,19 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { TiHome } from "react-icons/ti";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import Items from './Items'
 import { items } from '../data/items';
 import { companies } from '../data/companies';
-import { category } from '../data/category';
+import { category as defaultCategories } from '../data/category';
 import Products from "./Products";
 import { useScreen } from '../context/ScreenContext';
 import { IoSearch, IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { FaAngleRight, FaAngleLeft} from "react-icons/fa";
 import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
-import { supabase } from "./supabase";
+// import { supabase } from "./supabase";
+import { useProducts } from "../context/ProductContext";
 
 export default function Shop() {
     const { isMobile } = useScreen();
@@ -31,9 +32,10 @@ export default function Shop() {
     const [canScrollCompanyLeft, setCanScrollCompanyLeft] = useState(false);
     const [canScrollCompanyRight, setCanScrollCompanyRight] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [data, setData] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [data, setData] = useState([]);
+    // const [brands, setBrands] = useState([]);
+    // const [isLoading, setIsLoading] = useState(false);
+    const { data, brands, loading, categories } = useProducts();
 
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
@@ -75,157 +77,174 @@ export default function Shop() {
         );
     };
 
-    useEffect(() => {
-        fetchData();
-
-        const channel = supabase
-            .channel("product-changes")
-            .on(
-            "postgres_changes",
-            {
-                event: "UPDATE",
-                schema: "public",
-                table: "product",
-            },
-            (payload) => {
-                // console.log("Product updated:", payload);
-
-                // Status changed to published
-                if (payload.new.status === "published") {
-                fetchData();
-                }
-            }
-            )
-            .subscribe();
-
-            return () => {
-                supabase.removeChannel(channel);
-            };
-    }, []);
-
-    async function fetchData() {
-        setIsLoading(true);
-
-        const [
-            { data: products, error: productError },
-            { data: attributes, error: attributesError },
-            { data: values, error: valuesError }
-        ] = await Promise.all([
-            supabase
-                .from("product")
-                .select("*")
-                .eq("status", "published"),
-
-            supabase
-                .from("product_attribute")
-                .select("*"),
-
-            supabase
-                .from("product_attribute_value")
-                .select("*")
-        ]);
-
-        if (
-            productError ||
-            attributesError ||
-            valuesError
-        ) {
-            console.error(
-                productError ||
-                attributesError ||
-                valuesError
-            );
-
-            setIsLoading(false);
-            return;
-        }
-
-        // Create attribute lookup
-        const attributeMap = Object.fromEntries(
-            attributes
-                .filter(attr => attr.name == "brand")
-                .map(attr => [
-                    attr.product_id,
-                    attr
-                ])
+    const allCategories = useMemo(() => {
+        const existing = new Set(
+            defaultCategories.map(c => c.val.toLowerCase())
         );
 
-        const finishMap = Object.fromEntries(
-            attributes
-                .filter(attr => attr.name == "finish")
-                .map(attr => [
-                    attr.product_id,
-                    attr
-                ])
-        );
+        const dynamicCategories = categories
+            .filter(cat => !existing.has(cat.toLowerCase()))
+            .map(cat => ({
+                id: crypto.randomUUID(), 
+                text: cat.charAt(0).toUpperCase() + cat.slice(1),
+                val: cat.toLowerCase(),
+                isGeneral: true
+            }));
 
-        const attr_id = Object.fromEntries(
-            attributes
-                .filter(attr => attr.name == "Color Variation")
-                .map(attr => [
-                    attr.product_id,
-                    attr
-                ])
-        );
+        return [...defaultCategories, ...dynamicCategories];
+    }, [categories]);
 
-        // Create value lookup
-        const valueMap = Object.fromEntries(
-            values.map(value => [
-                value.attribute_id,
-                value
-            ])
-        );
+    // useEffect(() => {
+    //     fetchData();
+
+    //     const channel = supabase
+    //         .channel("product-changes")
+    //         .on(
+    //         "postgres_changes",
+    //         {
+    //             event: "UPDATE",
+    //             schema: "public",
+    //             table: "product",
+    //         },
+    //         (payload) => {
+    //             // console.log("Product updated:", payload);
+
+    //             // Status changed to published
+    //             if (payload.new.status === "published") {
+    //             fetchData();
+    //             }
+    //         }
+    //         )
+    //         .subscribe();
+
+    //         return () => {
+    //             supabase.removeChannel(channel);
+    //         };
+    // }, []);
+
+    // async function fetchData() {
+    //     setIsLoading(true);
+
+    //     const [
+    //         { data: products, error: productError },
+    //         { data: attributes, error: attributesError },
+    //         { data: values, error: valuesError }
+    //     ] = await Promise.all([
+    //         supabase
+    //             .from("product")
+    //             .select("*")
+    //             .eq("status", "published"),
+
+    //         supabase
+    //             .from("product_attribute")
+    //             .select("*"),
+
+    //         supabase
+    //             .from("product_attribute_value")
+    //             .select("*")
+    //     ]);
+
+    //     if (
+    //         productError ||
+    //         attributesError ||
+    //         valuesError
+    //     ) {
+    //         console.error(
+    //             productError ||
+    //             attributesError ||
+    //             valuesError
+    //         );
+
+    //         setIsLoading(false);
+    //         return;
+    //     }
+
+    //     // Create attribute lookup
+    //     const attributeMap = Object.fromEntries(
+    //         attributes
+    //             .filter(attr => attr.name == "brand")
+    //             .map(attr => [
+    //                 attr.product_id,
+    //                 attr
+    //             ])
+    //     );
+
+    //     const finishMap = Object.fromEntries(
+    //         attributes
+    //             .filter(attr => attr.name == "finish")
+    //             .map(attr => [
+    //                 attr.product_id,
+    //                 attr
+    //             ])
+    //     );
+
+    //     const attr_id = Object.fromEntries(
+    //         attributes
+    //             .filter(attr => attr.name == "Color Variation")
+    //             .map(attr => [
+    //                 attr.product_id,
+    //                 attr
+    //             ])
+    //     );
+
+    //     // Create value lookup
+    //     const valueMap = Object.fromEntries(
+    //         values.map(value => [
+    //             value.attribute_id,
+    //             value
+    //         ])
+    //     );
 
 
-        const filteredData = products.map(product => {
-            const brandAttribute = attributeMap[product.id];
-            const finishAttribute = finishMap[product.id];
-            const idAttribute = attr_id[product.id];
+    //     const filteredData = products.map(product => {
+    //         const brandAttribute = attributeMap[product.id];
+    //         const finishAttribute = finishMap[product.id];
+    //         const idAttribute = attr_id[product.id];
 
-            const attr = brandAttribute
-                ? valueMap[brandAttribute.id]
-                : null;
+    //         const attr = brandAttribute
+    //             ? valueMap[brandAttribute.id]
+    //             : null;
 
-            const vals = finishAttribute
-                ? valueMap[finishAttribute.id]
-                : null;
+    //         const vals = finishAttribute
+    //             ? valueMap[finishAttribute.id]
+    //             : null;
 
-            const attrid = idAttribute
-                ? valueMap[idAttribute.id]
-                : null;   
+    //         const attrid = idAttribute
+    //             ? valueMap[idAttribute.id]
+    //             : null;   
 
-            return {
-                ...product,
-                brand: attr?.value ?? null,
-                finish: vals?.value ?? null,
-                attr_id: attrid?.id ?? null,
-                prod_attr_id: attrid?.attribute_id ?? null
-            };
-        });
+    //         return {
+    //             ...product,
+    //             brand: attr?.value ?? null,
+    //             finish: vals?.value ?? null,
+    //             attr_id: attrid?.id ?? null,
+    //             prod_attr_id: attrid?.attribute_id ?? null
+    //         };
+    //     });
 
 
-        // console.log(filteredData);
-        // console.log(products);
-        // console.log(attributes);
-        // console.log(values);
-        // console.log('----------');
+    //     // console.log(filteredData);
+    //     // console.log(products);
+    //     // console.log(attributes);
+    //     // console.log(values);
+    //     // console.log('----------');
 
-        const filteredStore = [
-            ...new Map(
-                filteredData
-                .filter(item =>
-                    item.Store?.trim() &&
-                    item.brand?.trim()
-                )
-                .map(item => [item.Store, item])
-            ).values()
-        ];
-        // console.log(filteredStore);
-        setBrands(filteredStore);
+    //     const filteredStore = [
+    //         ...new Map(
+    //             filteredData
+    //             .filter(item =>
+    //                 item.Store?.trim() &&
+    //                 item.brand?.trim()
+    //             )
+    //             .map(item => [item.Store, item])
+    //         ).values()
+    //     ];
+    //     // console.log(filteredStore);
+    //     setBrands(filteredStore);
 
-        setData(filteredData);
-        setIsLoading(false);
-    }
+    //     setData(filteredData);
+    //     setIsLoading(false);
+    // }
 
     useEffect(() => {
         const slider = categorySliderRef.current;
@@ -347,7 +366,7 @@ export default function Shop() {
         return () => {
             window.removeEventListener("resize", checkOverflow);
         };
-    }, [category]);
+    }, [defaultCategories]);
 
     const selectCompany = (company) => {
         setSelectedCompany(company);
@@ -407,8 +426,12 @@ export default function Shop() {
                     overflow-x-hidden
                     scroll-smooth
                     flex-1`}>
-                    {category.map((cat, ccindx) => {
-                        const iconSrc = new URL(`../assets/img/icons/${cat.val}.png`,import.meta.url).href;
+                    {allCategories.map((cat, ccindx) => {
+                        const iconSrc = new URL(
+                            `../assets/img/icons/${cat.isGeneral ? "general" : cat.val}.png`,
+                            import.meta.url
+                        ).href;
+                        
                         return(   
                                 <Link
                                     key={`ddd-${ccindx}`}
@@ -494,7 +517,7 @@ export default function Shop() {
                             <div
                                 onClick={() => selectCompany(dt)}
                                 className={`
-                                    ${!isMobile ? 'w-29 h-29' : 'w-35 h-35'}
+                                    ${!isMobile ? 'w-35 h-35' : 'w-29 h-29'}
                                     shadow-lg
                                     cursor-pointer
                                     flex
@@ -594,7 +617,7 @@ export default function Shop() {
                 </div>
             </div>
             {
-                isLoading ? (
+                loading ? (
                     <div className="flex space-x-2 justify-center items-center h-50">
                         <div className="w-5 h-5 bg-[#2c539b] rounded-full animate-bounce"></div>
                         <div

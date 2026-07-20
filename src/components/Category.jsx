@@ -1,5 +1,5 @@
 import { useParams, useLocation } from 'react-router-dom';
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import { items } from '../data/items.js';
 import { PiBuildingsFill } from "react-icons/pi";
 import { MdOutlineCategory, Md3dRotation, MdArrowBackIos } from "react-icons/md";
@@ -16,17 +16,18 @@ import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
 import Items from './Items'
 import Footer from './Footer.jsx';
-import { category} from '../data/category';
+import { category as defaultCategories} from '../data/category';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
-
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { style } from 'framer-motion/client';
 import { supabase } from "./supabase";
+import { useProducts } from "../context/ProductContext";
 
 export default function Products() {
+    const { brands, categories } = useProducts();
     const { isMobile } = useScreen();
     const { cat } = useParams();
     const location = useLocation();
@@ -39,12 +40,11 @@ export default function Products() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDrawer, setShowDrawer] = useState(false);
     const [showViewer, setShowViewer] = useState(false);
-    // const filteredCompany = companies.filter(f => f.id != currentCompany.id);
     const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
     const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
     const categorySliderRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
-    // console.log(currentCategory);
+    // console.log(ctgry);
     const updateCategoryArrows = () => {
         const slider = categorySliderRef.current;
 
@@ -64,6 +64,23 @@ export default function Products() {
             slider.scrollLeft + slider.clientWidth < slider.scrollWidth - 1
         );
     };
+
+    const allCategories = useMemo(() => {
+        const existing = new Set(
+            defaultCategories.map(c => c.val.toLowerCase())
+        );
+
+        const dynamicCategories = categories
+            .filter(cat => !existing.has(cat.toLowerCase()))
+            .map(cat => ({
+                id: crypto.randomUUID(), 
+                text: cat.charAt(0).toUpperCase() + cat.slice(1),
+                val: cat.toLowerCase(),
+                isGeneral: true
+            }));
+
+        return [...defaultCategories, ...dynamicCategories];
+    }, [categories]);
 
     async function fetchData() {
         setIsLoading(true);
@@ -250,8 +267,9 @@ export default function Products() {
         <>
             <ButtonFloater page={{
                 ...location,
-                showCompanyButton: false,
-                stores: []
+                showCategoryButton: false,
+                showCompanyButton: true,
+                stores: brands
             }}/>
             <div className="min-h-screen flex flex-col">
                 <div className="flex-1">
@@ -319,8 +337,11 @@ export default function Products() {
                                         overflow-x-hidden
                                         scroll-smooth
                                         flex-1`}>
-                                        {category.map((category, cindx) => {
-                                            const iconSrc = new URL(`../assets/img/icons/${category.val}.png`,import.meta.url).href;
+                                        {allCategories.map((category, cindx) => {
+                                            const iconSrc = new URL(
+                                                `../assets/img/icons/${category.isGeneral ? "general" : category.val}.png`,
+                                                import.meta.url
+                                            ).href;
 
                                             return(    
                                                 <div

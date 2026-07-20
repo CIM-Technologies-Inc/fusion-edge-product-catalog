@@ -4,6 +4,7 @@ import { TiThList } from "react-icons/ti";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom"
 import { MdOutlineShoppingCart, MdOutlineCategory } from "react-icons/md";
+import { FcEngineering } from "react-icons/fc";
 import { PiBuildings } from "react-icons/pi";
 import { companies } from '../data/companies';
 import { category} from '../data/category';
@@ -122,128 +123,139 @@ export default function ButtonFloater({ page }) {
                         : "opacity-0 scale-95 translate-y-2 pointer-events-none"
                     }
                 `}>
-                <div className="">
-                    <button
-                        onClick={() => {
-                            setOpenCategories(prev => {
-                                const next = !prev;
+                {
+                    page.showCategoryButton && (
+                        <div className="">
+                            <button
+                                onClick={() => {
+                                    setOpenCategories(prev => {
+                                        const next = !prev;
 
-                                if (next) {
-                                    setOpenCompanies(false);
-                                }
+                                        if (next) {
+                                            setOpenCompanies(false);
+                                        }
 
-                                return next;
-                            });
-                        }}
-                        className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-100">
-                        <div className="flex items-center">
-                            <span className="font-semibold">Categories</span>
+                                        return next;
+                                    });
+                                }}
+                                className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-100">
+                                <div className="flex items-center">
+                                    <span className="font-semibold">Categories</span>
+                                </div>
+
+                                <FaChevronRight
+                                    className={`
+                                        text-sm
+                                        transition-transform
+                                        duration-300
+                                        ${openCategories ? "rotate-90" : ""}
+                                    `}
+                                />
+                            </button>
+
+                            <div
+                                className={`
+                                    overflow-hidden
+                                    transition-all
+                                    duration-300
+                                    ease-in-out
+                                    ${openCategories ? "max-h-100 opacity-100" : "max-h-0 opacity-0"}
+                                `}>
+                                <div className="pl-8 pb-2">
+                                    {category.map((cat) => {
+                                        const iconSrc = new URL(`../assets/img/icons/${cat.val}.png`,import.meta.url).href;
+                                        return (
+                                            <Link
+                                                key={cat.val}
+                                                to="/shop/category"
+                                                state={{ cat }}>
+                                                {cat.text !== "All" && (
+                                                    <div className="flex items-center py-1 hover:text-blue-600 cursor-pointer">
+                                                        <img
+                                                            src={iconSrc}
+                                                            alt={cat.text}
+                                                            className="w-8 h-8 object-contain mr-3"
+                                                        />
+                                                        {cat.text}
+                                                    </div>
+                                                )}
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+                            </div>
                         </div>
-
-                        <FaChevronRight
-                            className={`
-                                text-sm
-                                transition-transform
-                                duration-300
-                                ${openCategories ? "rotate-90" : ""}
-                            `}
-                        />
-                    </button>
-
-                    <div
-                        className={`
-                            overflow-hidden
-                            transition-all
-                            duration-300
-                            ease-in-out
-                            ${openCategories ? "max-h-100 opacity-100" : "max-h-0 opacity-0"}
-                        `}>
-                        <div className="pl-8 pb-2">
-                            {category.map((cat) => {
-                                const iconSrc = new URL(`../assets/img/icons/${cat.val}.png`,import.meta.url).href;
-                                return (
-                                    <Link
-                                        key={cat.val}
-                                        to="/shop"
-                                        state={{ category: cat }}>
-                                        {cat.text !== "All" && (
-                                            <div className="flex items-center py-1 hover:text-blue-600 cursor-pointer">
-                                                <img
-                                                    src={iconSrc}
-                                                    alt={cat.text}
-                                                    className="w-8 h-8 object-contain mr-3"
-                                                />
-                                                {cat.text}
-                                            </div>
-                                        )}
-                                    </Link>
-                                )
-                            })}
-                        </div>
-                    </div>
-                </div>
+                    )
+                }
                 {
                     page.showCompanyButton && (
                          <div>
-                    <button
-                        onClick={() => {
-                            setOpenCompanies(prev => {
-                                const next = !prev;
+                            <button
+                                onClick={() => {
+                                    setOpenCompanies(prev => {
+                                        const next = !prev;
 
-                                if (next) {
-                                    setOpenCategories(false);
-                                }
+                                        if (next) {
+                                            setOpenCategories(false);
+                                        }
 
-                                return next;
-                            });
-                        }}
-                        className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-100">
-                        <div className="flex items-center">
-                            <span className="font-semibold">Companies</span>
+                                        return next;
+                                    });
+                                }}
+                                className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-100">
+                                <div className="flex items-center">
+                                    <span className="font-semibold">Companies</span>
+                                </div>
+
+                                <FaChevronRight
+                                    className={`
+                                        text-sm
+                                        transition-transform
+                                        duration-300
+                                        ${openCompanies ? "rotate-90" : ""}
+                                    `}
+                                />
+                            </button>
+
+                                        
+                            <div
+                                className={`
+                                    overflow-hidden
+                                    transition-all
+                                    duration-300
+                                    ease-in-out
+                                    ${openCompanies ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+                                `}>
+                                <div className="pl-8 pb-2">
+                                    {menuItems.map((store) => (
+                                        <Link
+                                            key={store.id}
+                                            to={`/shop/${store.Store}`}
+                                            state={{dt: store}}
+                                        >
+                                            <div className="flex items-center py-2 hover:text-blue-600 cursor-pointer">
+                                                <img
+                                                    src={new URL(`../assets/img/store.png`,import.meta.url).href}
+                                                    alt={store.Store}
+                                                    className="w-8 h-8 object-contain mr-4 rounded-md"
+                                                />
+                                                {store.Store}
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-
-                        <FaChevronRight
-                            className={`
-                                text-sm
-                                transition-transform
-                                duration-300
-                                ${openCompanies ? "rotate-90" : ""}
-                            `}
-                        />
-                    </button>
-
-                                
-                    <div
-                        className={`
-                            overflow-hidden
-                            transition-all
-                            duration-300
-                            ease-in-out
-                            ${openCompanies ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
-                        `}>
-                        <div className="pl-8 pb-2">
-                            {menuItems.map((store) => (
-                                <Link
-                                    key={store.id}
-                                    to={`/shop/${store.Store}`}
-                                    state={{dt: store}}
-                                >
-                                    <div className="flex items-center py-2 hover:text-blue-600 cursor-pointer">
-                                        <img
-                                            src={new URL(`../assets/img/store.png`,import.meta.url).href}
-                                            alt={store.Store}
-                                            className="w-8 h-8 object-contain mr-4 rounded-md"
-                                        />
-                                        {store.Store}
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </div>
                     )
                 }
-               
+                <div className="w-full flex px-4 py-3 hover:bg-gray-100 cursor-pointer">
+                    <Link
+                        to="https://fusionedge.instawp.site/shop/"
+                        className="flex w-full items-center justify-between">
+                        <span className="font-semibold">FusionEdge V1</span>
+                        <FcEngineering className="text-xl" />
+                    </Link>
+                </div>
             </div>
                 <button
                     onClick={() => setOpenMenu(!openMenu)}
