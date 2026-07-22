@@ -206,6 +206,10 @@
             }
             
             const result = productAttributes.reduce((obj, attribute) => {
+                 if (attribute.name == "url") {
+                    return obj;
+                }
+
                 const value = attributeValues.find(
                     item => item.attribute_id === attribute.id
                 );
@@ -295,7 +299,7 @@
                 if (rfaAttr) {
                     result['data-cim-url'] = valueMap[rfaAttr.id] ?? null;
                 }
-                console.log('test the result', result);
+                // console.log('test the result', result);
                 setProductAttributes(result);
             } catch (err) {
                 console.error(err);
@@ -745,7 +749,7 @@
                                         </button>
                                     </div> */}
                                     <p className='text-sm font-semibold text-gray-700 leading-7'>SKU : <span className='text-gray-400 uppercase'>{passedProduct.sku}</span></p>
-                                    
+                                    <p className='text-sm font-semibold text-gray-700 leading-7'>STORE : <span className='text-gray-400 uppercase'>{passedProduct.Store}</span></p>
                                     <p className='text-sm font-semibold text-gray-700 leading-7'>BRAND : <span className='text-gray-400 uppercase'>{passedProduct.brand}</span></p>
                                 </div>
                                 
@@ -765,7 +769,7 @@
                                                 className={`
                                                     overflow-hidden
                                                     transition-all duration-300 ease-in-out
-                                                    ${showDescription ? "max-h-40 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                    ${showDescription ? "max-h-100 opacity-100 mt-4" : "max-h-0 opacity-0"}
                                                 `}>
                                                 <span className="text-sm font-light">
                                                     {passedProduct.description}
@@ -775,8 +779,8 @@
                                         </>
                                     )
                                 }
-                                {
-                                    !forVariation && (
+                                {/* {
+                                    !forVariation && ( */}
                                         <>
                                             <hr className="border-gray-300 my-4" />
                                             <div className={`flex justify-between cursor-pointer ${ showAttribute ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowAttribute(prev => !prev);}}>
@@ -791,7 +795,7 @@
                                                 className={`
                                                     overflow-hidden
                                                     transition-all duration-300 ease-in-out
-                                                    ${showAttribute ? "max-h-40 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                    ${showAttribute ? "max-h-100 opacity-100 mt-4" : "max-h-0 opacity-0"}
                                                 `}>
                                                 {Object.entries(attributes).map(([key, value]) => (
                                                     <div key={key} className="flex pb-2">
@@ -803,8 +807,8 @@
                                                 ))}
                                             </div>
                                         </>
-                                    )
-                                }
+                                    {/* )
+                                } */}
                                 <hr className="border-gray-300 my-4" />
                                 {
                                     passedProduct?.classification && passedProduct.classification != '' && (

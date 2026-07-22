@@ -245,14 +245,14 @@ export default function Products() {
                                             <span className='text-xs'>BACK</span>
                                         </div>
                                     </Link> */}
-                                {!isMobile ? (
+                                {/* {!isMobile ? ( */}
                                     <div className="mt-10 text-2xl font-bold text-gray-500">
                                         <div className="flex items-center mr-2">
                                             <PiBuildingsFill className="mr-2 text-[#2c539b]" />
                                             <h2 className="text-[#2c539b]">{selectedBrand.Store}</h2>
                                         </div>
                                     </div>
-                                ) : (
+                                {/* ) : (
                                     <div className='mt-4 w-full'>
                                         <img
                                             src={new URL(`../assets/img/banner/${selectedBrand.val}.png`, import.meta.url).href}
@@ -260,7 +260,7 @@ export default function Products() {
                                             className="w-full h-auto object-contain"
                                         />
                                     </div>
-                                )}
+                                )} */}
                                 <div className='flex flex-wrap gap-3items-center mt-10'>
                                     <MdOutlineCategory className='mr-1 text-gray-500 text-lg mt-1'/>
                                     <h1 className="text-xl text-gray-500 font-bold">Category </h1><small className='pl-1 font-extralight pt-1'> (Browse all building product categories)</small>

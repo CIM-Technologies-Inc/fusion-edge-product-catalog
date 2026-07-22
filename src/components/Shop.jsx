@@ -8,7 +8,8 @@ import { companies } from '../data/companies';
 import { category as defaultCategories } from '../data/category';
 import Products from "./Products";
 import { useScreen } from '../context/ScreenContext';
-import { IoSearch, IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { FcSearch } from "react-icons/fc";
 import { FaAngleRight, FaAngleLeft} from "react-icons/fa";
 import ButtonFloater from "./ButtonFloater";
 import Breadcrumb from './BreadCrumb';
@@ -572,7 +573,7 @@ export default function Shop() {
             {/* <div className={`${isMobile ? 'mt-4' : 'mt-8'}`}>
                 <h1 className={`text-2xl font-base ${isMobile ? 'pt-2' : 'pt-6'}`}>Popular Products</h1>
             </div> */}
-            <div className={`flex flex-wrap-reverse ${isMobile ? 'mt-8' : 'mt-12'} justify-between items-center`}>
+            <div className={`flex flex-wrap-reverse ${isMobile ? 'mt-8 mb-4' : 'mt-12'} justify-between items-center`}>
                 <span className={`text-xs font-light ${isMobile && showSearch ? 'mt-6' : ''}`}>SHOWING {`(${filteredItems.length}) `} PRODUCT</span>
                 <div className={`flex items-center ${isMobile ? 'gap-4' : 'gap-2'}`}>
                     <div
@@ -602,18 +603,18 @@ export default function Shop() {
                             />
                     </div>
 
-                    <IoSearch
+                    <FcSearch 
                         onClick={handleSearchClick}
-                        className="
+                        className={`
                             text-gray-600
                             cursor-pointer
-                            text-2xl
+                            ${isMobile ? 'text-2xl' : 'text-4xl'}
                             hover:scale-130
                             transition-all
                             hover:text-[#265bbd] 
                             duration-300
                             ease-in-out
-                        "/>
+                        `}/>
                 </div>
             </div>
             {

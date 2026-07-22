@@ -111,10 +111,10 @@ export const ProductProvider = ({ children }) => {
             )
         ];
 
-        // console.log(products);
-        // console.log(attributes.filter(f => f.product_id == 284));
-        // console.log(values);
-        // console.log('----------');
+        console.log(products);
+        console.log(attributes.filter(f => f.product_id == 140));
+        console.log(values);
+        console.log('----------');
 
         setCategories(uniqueCategory);
         setData(filteredData);
