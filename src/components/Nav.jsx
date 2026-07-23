@@ -19,9 +19,9 @@ export default function Nav() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
-            <Link to="/login" className='text-sm font-medium hover:text-[#265bbd] hover:scale-125 transition-all duration-300 ease-in-out'>
+            {/* <Link to="/login" className='text-sm font-medium hover:text-[#265bbd] hover:scale-125 transition-all duration-300 ease-in-out'>
                 Login
-            </Link>
+            </Link> */}
 
             <Link to="/shop" className='text-sm font-medium hover:text-[#265bbd] hover:scale-125 transition-all duration-300 ease-in-out'>
                 Shop
@@ -51,7 +51,7 @@ export default function Nav() {
 
       {/* Sidebar */}
       <div className={`
-          fixed top-0 right-0 h-full ${ isMobile ? 'w-50' : 'w-105'} bg-gray-800 text-white z-50 shadow-lg
+          fixed top-0 right-0 h-full ${ isMobile ? 'w-80' : 'w-105'} bg-gray-800 text-white z-50 shadow-lg
           transform transition-transform duration-300
           ${openMenu ? "translate-x-0" : "translate-x-full"}`}>
         <div className="p-5 flex justify-end items-center">
@@ -84,12 +84,12 @@ export default function Nav() {
             <span className="text-xl">Search</span>
           </div>
 
-          <Link
+          {/* <Link
             to="/login"
             onClick={() => setOpenMenu(false)}
             className="text-sm font-medium hover:text-blue-600">
             <span className='text-xl font-semibold'>Login</span>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </>

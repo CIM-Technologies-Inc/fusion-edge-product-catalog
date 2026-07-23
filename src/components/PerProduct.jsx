@@ -37,6 +37,7 @@
         const [showZoom, setShowZoom] = useState(false);
         const [view, setViewer] = useState(false);
         const [animate, setAnimate] = useState(false);
+        const [loading, setLoading] = useState(true);
         const [review, setReview] = useState(0);
         const [rating, setRating] = useState(0);
         const [hover, setHover] = useState(0);
@@ -63,18 +64,16 @@
         const { perproduct } = useParams();
         const location = useLocation();
         const passedProduct = location.state?.item;
-
-        // const productDetails = items.filter(f => f.id == passedProduct.id);
-        const relatedProduct = items.filter(f => f.company == passedProduct.company && f.id != passedProduct.id);
         const company = companies.filter(f => f.val == passedProduct.brand)[0];
         const [imgSource, setImgSource] = useState(passedProduct.image_url);
         const [productAttributes, setProductAttributes] = useState({});
-        const { brands } = useProducts();
+        const { brands, data } = useProducts();
         
-        // console.log(brands);
+        // console.log(data);
         // console.log(passedProduct);
         // console.log('------');
-
+        
+        const relatedProduct = data.filter(f => f.brand == passedProduct.brand);
         const parsedSample = passedProduct?.sample_json
             ? JSON.parse(passedProduct.sample_json)
             : {};
@@ -154,72 +153,80 @@
         }, [quantity])
         
         const fetchAttribute = async () => {
-            if (!passedProduct?.attr_id) return;
+            setLoading(true);
+
+            try {
+                if (!passedProduct?.attr_id) return;
            
-            const { data: attributes, error: attributesError } = await supabase
-                .from("product_attribute")
-                .select("*")
-                .eq("id", passedProduct.prod_attr_id)
-                .single();
+                const { data: attributes, error: attributesError } = await supabase
+                    .from("product_attribute")
+                    .select("*")
+                    .eq("id", passedProduct.prod_attr_id)
+                    .single();
 
-            if (attributesError) {
-                console.error(attributesError);
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from("product_attribute_value")
-                .select("*")
-                .eq("id", passedProduct.attr_id)
-                .single();
-
-            if (error) {
-                console.error(error);
-                return;
-            }
-           
-            if(attributes.used_for_variation) {
-                setVariantList(JSON.parse(data.value));
-                setForVariation(attributes.used_for_variation);
-            } 
-            const { data: productAttributes, error: productAttributeError } = await supabase
-                .from("product_attribute")
-                .select("id, name")
-                .eq("product_id", passedProduct.id)
-                .eq("used_for_variation", false);
-
-            if (productAttributeError) {
-                console.error(productAttributeError);
-                return;
-            }
-
-            const attributeIds = productAttributes.map(item => item.id);
-
-            const { data: attributeValues, error: attributeValueError } = await supabase
-                .from("product_attribute_value")
-                .select("attribute_id, value")
-                .in("attribute_id", attributeIds);
-
-            if (attributeValueError) {
-                console.error(attributeValueError);
-                return;
-            }
-            
-            const result = productAttributes.reduce((obj, attribute) => {
-                 if (attribute.name == "url") {
-                    return obj;
+                if (attributesError) {
+                    console.error(attributesError);
+                    return;
                 }
 
-                const value = attributeValues.find(
-                    item => item.attribute_id === attribute.id
-                );
+                const { data, error } = await supabase
+                    .from("product_attribute_value")
+                    .select("*")
+                    .eq("id", passedProduct.attr_id)
+                    .single();
 
-                obj[attribute.name] = value?.value ?? "";
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+            
+                if(attributes.used_for_variation) {
+                    setVariantList(JSON.parse(data.value));
+                    setForVariation(attributes.used_for_variation);
+                } 
+                const { data: productAttributes, error: productAttributeError } = await supabase
+                    .from("product_attribute")
+                    .select("id, name")
+                    .eq("product_id", passedProduct.id)
+                    .eq("used_for_variation", false);
 
-                return obj;
-            }, {});
+                if (productAttributeError) {
+                    console.error(productAttributeError);
+                    return;
+                }
 
-            setAttributes(result);
+                const attributeIds = productAttributes.map(item => item.id);
+
+                const { data: attributeValues, error: attributeValueError } = await supabase
+                    .from("product_attribute_value")
+                    .select("attribute_id, value")
+                    .in("attribute_id", attributeIds);
+
+                if (attributeValueError) {
+                    console.error(attributeValueError);
+                    return;
+                }
+                
+                const result = productAttributes.reduce((obj, attribute) => {
+                    if (attribute.name == "url") {
+                        return obj;
+                    }
+
+                    const value = attributeValues.find(
+                        item => item.attribute_id === attribute.id
+                    );
+
+                    obj[attribute.name] = value?.value ?? "";
+
+                    return obj;
+                }, {});
+
+                setAttributes(result);
+            } finally {
+                setTimeout(() => {
+                    setLoading(false);
+                } , 1000)
+            }
         };
 
         useEffect(() => {
@@ -337,43 +344,64 @@
 
                     <div className={`${isMobile ? 'pl-8 pr-8' : 'pl-40 pr-40'}`}>
                         <div className='mt-20 flex flex-wrap items-center gap-y-2'>
-                            <Breadcrumb items={[
-                                {
-                                    label: "Shop",
-                                    to: "/shop",
-                                },
-                                {
-                                    label: passedProduct.brand,
-                                    to: `/shop/${passedProduct.brand}`,
-                                    state: {
-                                        dt: passedProduct,
-                                    },
-                                },
-                                {
-                                    label: passedProduct.category,
-                                    to: `/shop/category`,
-                                    state: { 
-                                        cat: {
-                                            id: passedProduct.id,
-                                            text: passedProduct.category.charAt(0).toUpperCase() + passedProduct.category.slice(1).toLowerCase(),
-                                            val: passedProduct.category,
-                                        }
-                                    },
-                                },
-                                // {
-                                //     label: passedProduct.finish,
-                                //     to: `/shop/${passedProduct.brand}`,
-                                //     state: {
-                                //         company: {
-                                //         ...company,
-                                //         filterBy: passedProduct.category,
-                                //         },
-                                //     },
-                                // },
-                                {
-                                    label: perproduct,
-                                },
-                            ]}/>
+                            {
+                                loading ? (
+                                    <div className="flex items-center gap-3 animate-pulse mb-4">
+                                        <div className="h-4 w-14 rounded bg-gray-200" />
+
+                                        <div className="h-3 w-3 rounded bg-gray-200" />
+
+                                        <div className="h-4 w-20 rounded bg-gray-200" />
+
+                                        <div className="h-3 w-3 rounded bg-gray-200" />
+
+                                        <div className="h-4 w-24 rounded bg-gray-200" />
+
+                                        <div className="h-3 w-3 rounded bg-gray-200" />
+
+                                        <div className="h-4 w-40 rounded bg-gray-200" />
+                                    </div>
+                                ) : (
+                                     <Breadcrumb items={[
+                                        {
+                                            label: "Shop",
+                                            to: "/shop",
+                                        },
+                                        {
+                                            label: passedProduct.brand,
+                                            to: `/shop/${passedProduct.brand}`,
+                                            state: {
+                                                dt: passedProduct,
+                                            },
+                                        },
+                                        {
+                                            label: passedProduct.category,
+                                            to: `/shop/category`,
+                                            state: { 
+                                                cat: {
+                                                    id: passedProduct.id,
+                                                    text: passedProduct.category.charAt(0).toUpperCase() + passedProduct.category.slice(1).toLowerCase(),
+                                                    val: passedProduct.category,
+                                                }
+                                            },
+                                        },
+                                        // {
+                                        //     label: passedProduct.finish,
+                                        //     to: `/shop/${passedProduct.brand}`,
+                                        //     state: {
+                                        //         company: {
+                                        //         ...company,
+                                        //         filterBy: passedProduct.category,
+                                        //         },
+                                        //     },
+                                        // },
+                                        {
+                                            label: perproduct,
+                                        },
+                                    ]}/>
+                                )
+                            }
+                           
                         </div>
 
                         <div className="grid sm:grid-cols-1 lg:grid-cols-2 md:grid-cols-1 gap-8">
@@ -430,23 +458,30 @@
                                 data-width="400"
                                 data-height="400"
                                 {...productAttributes}>
-                                <img
-                                    src={imgSource}
-                                    alt="Item-Image"
-                                    className={`
-                                        w-full
-                                        h-auto
-                                        max-h-225
-                                        object-contain
-                                        transition-all
-                                        duration-300
-                                        ease-in-out
-                                        ${variant ? 'rounded-[114px] p-6' : ''}
-                                        mt-4
-                                        ${animate
-                                            ? 'opacity-0 -translate-x-10'
-                                            : 'opacity-100 translate-x-0'}
-                                    `}/>
+                                 {loading ? (
+                                        <div className="w-full h-[500px] rounded-3xl bg-gray-200 animate-pulse" />
+                                    ) : (
+                                        <img
+                                            src={imgSource}
+                                            alt="Item-Image"
+                                            className={`
+                                                w-full
+                                                h-auto
+                                                max-h-225
+                                                object-contain
+                                                transition-all
+                                                duration-300
+                                                ease-in-out
+                                                ${variant ? "rounded-[114px] p-6" : ""}
+                                                mt-4
+                                                ${
+                                                    animate
+                                                        ? "opacity-0 -translate-x-10"
+                                                        : "opacity-100 translate-x-0"
+                                                }
+                                            `}
+                                        />
+                                    )}
                             </figure>
                             {
                                 productList.length > 0 && (
@@ -479,13 +514,31 @@
                                 )
                             }
                             <div className="mt-6">
-                                <h1 className='text-3xl font-bold'>{perproduct}</h1>
-                                <span className='text-gray-600 font-bold block pt-4 text-lg uppercase'>₱  {passedProduct.price}</span>
                                 {
-                                    forVariation && (
-                                        <span className='text-gray-600 font-medium block pt-4 text-md'>Variant</span>
+                                    loading ? (
+                                        <>
+                                            <div className="h-10 w-3/4 rounded bg-gray-200 animate-pulse" />
+                                            <div className="mt-4 h-6 w-32 rounded bg-gray-200 animate-pulse" />
+                                            <div className="mt-8 h-5 w-full rounded bg-gray-200 animate-pulse" />
+                                            <div className="mt-3 h-5 w-5/6 rounded bg-gray-200 animate-pulse" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <h1 className="text-3xl font-bold">{perproduct}</h1>
+
+                                            <span className="text-gray-600 font-bold block pt-4 text-lg uppercase">
+                                                ₱ {passedProduct.price}
+                                            </span>
+
+                                            {
+                                                forVariation && (
+                                                    <span className='text-gray-600 font-medium block pt-4 text-md'>Variant</span>
+                                                )
+                                            }
+                                        </>
                                     )
                                 }
+                                
                                 {/* <select className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 mt-4 mb-4"
                                     onChange={(e) => {
                                         const selected = variantList.find(
@@ -504,75 +557,86 @@
                                     ))}
                                 </select> */}
                                 {
-                                    forVariation && (
-                                         <div className="flex flex-wrap gap-3 mt-4 mb-4">
-                                            {variantList.map((item) => (
+                                    loading ? (
+                                        <div className="flex gap-3 mt-4">
+                                            {[...Array(6)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="w-12 h-12 rounded-full bg-gray-200 animate-pulse"
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        forVariation && (
+                                            <div className="flex flex-wrap gap-3 mt-4 mb-4">
+                                                {variantList.map((item) => (
+                                                    <button
+                                                        key={item.code}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setVariant(item);
+                                                            // console.log(item);
+
+                                                            setProductAttributes(prev => ({
+                                                                ...prev,
+                                                                "data-cim-color-code": item.hex,
+                                                            }));
+
+                                                            const image = createColorImage(item.hex);
+                                                            setImgSource(image);
+                                                        }}
+                                                        title={`${item.name} (${item.code})`}
+                                                        className={`
+                                                            w-12
+                                                            h-12
+                                                            rounded-full
+                                                            border-2
+                                                            transition-all
+                                                            duration-200
+                                                            hover:scale-110
+                                                            cursor-pointer
+                                                            ${
+                                                                variant?.code == item.code
+                                                                    ? "border-black ring-2 ring-blue-500"
+                                                                    : "border-gray-300"
+                                                            }
+                                                        `}
+                                                        style={{
+                                                            backgroundColor: item.hex,
+                                                            borderColor: item.hex,
+                                                        }}
+                                                    />
+                                                ))}
                                                 <button
-                                                    key={item.code}
                                                     type="button"
+                                                    // onClick={() => setVariant(null)}
                                                     onClick={() => {
-                                                        setVariant(item);
-                                                        // console.log(item);
-
-                                                         setProductAttributes(prev => ({
-                                                            ...prev,
-                                                            "data-cim-color-code": item.hex,
-                                                        }));
-
-                                                        const image = createColorImage(item.hex);
-                                                        setImgSource(image);
+                                                        setVariant(null)
+                                                        setImgSource(passedProduct?.image_url)
                                                     }}
-                                                    title={`${item.name} (${item.code})`}
+                                                    
+                                                    title="Show Product Image"
                                                     className={`
                                                         w-12
                                                         h-12
                                                         rounded-full
-                                                        border-2
+                                                        bg-white
+                                                        cursor-pointer
                                                         transition-all
                                                         duration-200
                                                         hover:scale-110
-                                                        cursor-pointer
-                                                        ${
-                                                            variant?.code == item.code
-                                                                ? "border-black ring-2 ring-blue-500"
-                                                                : "border-gray-300"
-                                                        }
-                                                    `}
-                                                    style={{
-                                                        backgroundColor: item.hex,
-                                                        borderColor: item.hex,
-                                                    }}
-                                                />
-                                            ))}
-                                            <button
-                                                type="button"
-                                                // onClick={() => setVariant(null)}
-                                                onClick={() => {
-                                                    setVariant(null)
-                                                    setImgSource(passedProduct?.image_url)
-                                                }}
-                                                
-                                                title="Show Product Image"
-                                                className={`
-                                                    w-12
-                                                    h-12
-                                                    rounded-full
-                                                    bg-white
-                                                    cursor-pointer
-                                                    transition-all
-                                                    duration-200
-                                                    hover:scale-110
-                                                    ${!variant ? "ring-2 ring-blue-500" : ""}
-                                                `}>
-                                                ✕
-                                            </button>
-                                        </div>
+                                                        ${!variant ? "ring-2 ring-blue-500" : ""}
+                                                    `}>
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )
                                     )
                                 }
                                 {
                                     variant && (
                                         <>
-                                            <span className='text-gray-600 font-medium block pt-4 text-md'>Variant Name - Code </span>
+                                            <span className='text-gray-600 font-medium block pt-4 text-md'>Variant Name/Code </span>
                                             <p className='text-gray-600 font-medium block pt-2 text-md'>{`${variant.name} ${variant.code}`}</p>
                                         </>
                                         
@@ -726,62 +790,96 @@
                                 
                                 </div>
 
-                                <div className=''>
-                                    {/* <div className='flex flex-col sm:flex-row sm:items-center gap-3 mt-8 mb-8'>
-                                        <div className='flex items-center border border-blue-500 rounded p-2 sm:p-3 w-fit self-end sm:self-auto mr-1'>
-                                            <button className='cursor-pointer hover:bg-[#2872fa] hover:text-white p-2 rounded transition-colors duration-300 ease-in-out'
-                                                onClick={() =>
-                                                    setQuantity((prev) => (prev > 1 ? prev - 1 : 1))
-                                                }>
-                                                <FaMinus className='text-xs'/>
-                                            </button>
-                                            <span className='cursor-pointer pl-4 pr-4 text-sm'>{ quantity }</span>
-                                            <button className='cursor-pointer hover:bg-[#2872fa] hover:text-white p-2 rounded transition-colors duration-300 ease-in-out'
-                                                onClick={() => setQuantity((prev) => prev + 1)}>
-                                                <FaPlus className='text-xs'/>
-                                            </button>
-                                        </div>
-                                        <button onClick={() => {
-                                              
-                                            }} 
-                                            className='cursor-pointer bg-[#2872fa] hover:bg-[#1864f1] p-4 rounded text-white w-full text-sm hover:scale-103 transition-all duration-300 ease-in-out'>
-                                            Add to cart
-                                        </button>
-                                    </div> */}
-                                    <p className='text-sm font-semibold text-gray-700 leading-7'>SKU : <span className='text-gray-400 uppercase'>{passedProduct.sku}</span></p>
-                                    <p className='text-sm font-semibold text-gray-700 leading-7'>STORE : <span className='text-gray-400 uppercase'>{passedProduct.Store}</span></p>
-                                    <p className='text-sm font-semibold text-gray-700 leading-7'>BRAND : <span className='text-gray-400 uppercase'>{passedProduct.brand}</span></p>
-                                </div>
-                                
                                 {
-                                    passedProduct?.description && passedProduct.description != '' && (
+                                    loading ? (
+                                        <div className="space-y-3">
+                                            <div className="h-4 w-48 rounded bg-gray-200" />
+                                            <div className="h-4 w-40 rounded bg-gray-200" />
+                                            <div className="h-4 w-44 rounded bg-gray-200" />
+                                        </div>
+                                    ) : (
+                                        <div className=''>
+                                            {/* <div className='flex flex-col sm:flex-row sm:items-center gap-3 mt-8 mb-8'>
+                                                <div className='flex items-center border border-blue-500 rounded p-2 sm:p-3 w-fit self-end sm:self-auto mr-1'>
+                                                    <button className='cursor-pointer hover:bg-[#2872fa] hover:text-white p-2 rounded transition-colors duration-300 ease-in-out'
+                                                        onClick={() =>
+                                                            setQuantity((prev) => (prev > 1 ? prev - 1 : 1))
+                                                        }>
+                                                        <FaMinus className='text-xs'/>
+                                                    </button>
+                                                    <span className='cursor-pointer pl-4 pr-4 text-sm'>{ quantity }</span>
+                                                    <button className='cursor-pointer hover:bg-[#2872fa] hover:text-white p-2 rounded transition-colors duration-300 ease-in-out'
+                                                        onClick={() => setQuantity((prev) => prev + 1)}>
+                                                        <FaPlus className='text-xs'/>
+                                                    </button>
+                                                </div>
+                                                <button onClick={() => {
+                                                    
+                                                    }} 
+                                                    className='cursor-pointer bg-[#2872fa] hover:bg-[#1864f1] p-4 rounded text-white w-full text-sm hover:scale-103 transition-all duration-300 ease-in-out'>
+                                                    Add to cart
+                                                </button>
+                                            </div> */}
+                                            <p className='text-sm font-semibold text-gray-700 leading-7'>SKU : <span className='text-gray-400 uppercase'>{passedProduct.sku}</span></p>
+                                            <p className='text-sm font-semibold text-gray-700 leading-7'>STORE : <span className='text-gray-400 uppercase'>{passedProduct.Store}</span></p>
+                                            <p className='text-sm font-semibold text-gray-700 leading-7'>BRAND : <span className='text-gray-400 uppercase'>{passedProduct.brand}</span></p>
+                                        </div>
+                                    )
+                                }
+                                {
+                                    loading ? (
                                         <>
                                             <hr className="border-gray-300 my-4" />
-                                            <div className={`flex justify-between cursor-pointer ${ showDescription ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowDescription(prev => !prev);}}>
-                                                <span className='text-xs hover:text-blue-500 cursor-pointer'>DESCRIPTION</span>
-                                                {
-                                                    showDescription 
-                                                    ? <IoIosArrowUp className='cursor-pointer'/>
-                                                    : <IoIosArrowDown className='cursor-pointer'/>
-                                                }
+
+                                            <div className="flex justify-between items-center">
+                                                <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
+                                                <div className="h-4 w-4 rounded bg-gray-200 animate-pulse" />
                                             </div>
-                                            <div
-                                                className={`
-                                                    overflow-hidden
-                                                    transition-all duration-300 ease-in-out
-                                                    ${showDescription ? "max-h-100 opacity-100 mt-4" : "max-h-0 opacity-0"}
-                                                `}>
-                                                <span className="text-sm font-light">
-                                                    {passedProduct.description}
-                                                </span>
-                                            </div>
-                                           
+
                                         </>
+                                    ) : (
+                                       passedProduct?.description && passedProduct.description != '' && (
+                                            <>
+                                                <hr className="border-gray-300 my-4" />
+                                                <div className={`flex justify-between cursor-pointer ${ showDescription ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowDescription(prev => !prev);}}>
+                                                    <span className='text-xs hover:text-blue-500 cursor-pointer'>DESCRIPTION</span>
+                                                    {
+                                                        showDescription 
+                                                        ? <IoIosArrowUp className='cursor-pointer'/>
+                                                        : <IoIosArrowDown className='cursor-pointer'/>
+                                                    }
+                                                </div>
+                                                <div
+                                                    className={`
+                                                        overflow-hidden
+                                                        transition-all duration-300 ease-in-out
+                                                        ${showDescription ? "max-h-100 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                    `}>
+                                                    <span className="text-sm font-light">
+                                                        {passedProduct.description}
+                                                    </span>
+                                                </div>
+                                            
+                                            </>
+                                        )
                                     )
                                 }
                                 {/* {
                                     !forVariation && ( */}
-                                        <>
+
+                                {
+                                    loading ? (
+                                         <>
+                                            <hr className="border-gray-300 my-4" />
+
+                                            <div className="flex justify-between items-center">
+                                                <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
+                                                <div className="h-4 w-4 rounded bg-gray-200 animate-pulse" />
+                                            </div>
+
+                                        </>
+                                    ) : (
+                                          <>
                                             <hr className="border-gray-300 my-4" />
                                             <div className={`flex justify-between cursor-pointer ${ showAttribute ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowAttribute(prev => !prev);}}>
                                                 <span className='text-xs hover:text-blue-500 cursor-pointer'>ATTRIBUTES</span>
@@ -797,16 +895,33 @@
                                                     transition-all duration-300 ease-in-out
                                                     ${showAttribute ? "max-h-100 opacity-100 mt-4" : "max-h-0 opacity-0"}
                                                 `}>
-                                                {Object.entries(attributes).map(([key, value]) => (
-                                                    <div key={key} className="flex pb-2">
-                                                        <span className="w-40 font-base capitalize">
-                                                            {key}
-                                                        </span>
-                                                        <span>{value}</span>
-                                                    </div>
-                                                ))}
+                                                {
+                                                    loading
+                                                    ? (
+                                                        [...Array(5)].map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className="flex justify-between py-2"
+                                                            >
+                                                                <div className="h-4 w-32 rounded bg-gray-200 animate-pulse" />
+                                                                <div className="h-4 w-48 rounded bg-gray-200 animate-pulse" />
+                                                            </div>
+                                                        ))
+                                                    )
+                                                    : (
+                                                        Object.entries(attributes).map(([key, value]) => (
+                                                            <div key={key} className="flex pb-2">
+                                                                <span className="w-40 capitalize">{key}</span>
+                                                                <span>{value}</span>
+                                                            </div>
+                                                        ))
+                                                    )
+                                                }
                                             </div>
                                         </>
+                                    )
+                                }
+                                      
                                     {/* )
                                 } */}
                                 <hr className="border-gray-300 my-4" />
@@ -911,87 +1026,100 @@
                                         </>
                                     )
                                 }
-                                <div className={`flex justify-between cursor-pointer ${ showReview ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowReview(prev => !prev);}}>
-                                    <span className='text-xs font-base'>REVIEWS ({review})</span>
-                                    {
-                                        showReview
-                                        ? <IoIosArrowUp className='cursor-pointer'/>
-                                        : <IoIosArrowDown className='cursor-pointer'/>
-                                    }
-                                </div>
-                                <div
-                                    className={`
-                                        overflow-hidden
-                                        transition-all duration-300 ease-in-out
-                                        ${showReview ? "max-h-500 opacity-100 mt-4" : "max-h-0 opacity-0"}
-                                    `}>
-                                    <span className='font-semibold text-base block mt-4'>Reviews</span>
-                                    <span className='block mt-6 text-sm text-gray-400'>There are no reviews yet.</span>
+                                {
+                                    loading ? (
+                                         <>
+                                            <div className="flex justify-between items-center">
+                                                <div className="h-4 w-28 rounded bg-gray-200 animate-pulse" />
+                                                <div className="h-4 w-4 rounded bg-gray-200 animate-pulse" />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className={`flex justify-between cursor-pointer ${ showReview ? "text-blue-500 font-bold" : "hover:text-blue-500"}`} onClick={() => {setShowReview(prev => !prev);}}>
+                                                <span className='text-xs font-base'>REVIEWS ({review})</span>
+                                                {
+                                                    showReview
+                                                    ? <IoIosArrowUp className='cursor-pointer'/>
+                                                    : <IoIosArrowDown className='cursor-pointer'/>
+                                                }
+                                            </div>
+                                            <div
+                                                className={`
+                                                    overflow-hidden
+                                                    transition-all duration-300 ease-in-out
+                                                    ${showReview ? "max-h-500 opacity-100 mt-4" : "max-h-0 opacity-0"}
+                                                `}>
+                                                <span className='font-semibold text-base block mt-4'>Reviews</span>
+                                                <span className='block mt-6 text-sm text-gray-400'>There are no reviews yet.</span>
 
-                                    <div className='mt-16'>
-                                        <span className='font-semibold text-base block mt-4'>Be the first to review "{perproduct}"</span>
-                                        <p className='block mt-4 text-sm font-light text-gray-500'>Your email address will not be published. Required fields are marked <span className='text-red-400'>*</span></p>
-                                        
-                                        <div className="flex gap-2 mt-8">
-                                            <p className='text-xs text-gray-600 block mr-2'>YOUR RATING <span className='text-red-400'>*</span></p>
-                                            {[1, 2, 3, 4, 5].map((star, strindx) => (
-                                            <button
-                                                key={star}
-                                                onClick={() => setRating(star)}
-                                                onMouseEnter={() => setHover(star)}
-                                                onMouseLeave={() => setHover(0)}
-                                                key={`sss-${strindx}`}>
-                                                {star <= (hover || rating) ? (
-                                                    <FaStar className="text-base text-orange-400 cursor-pointer transition" />
-                                                ) : (
-                                                    <FaRegStar className="text-base text-orange-400 cursor-pointer transition" />
-                                                )}
-                                            </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap mt-6">
-                                        <div className="w-full md:w-1/2  mb-6 md:mb-0">
-                                            <label className="block tracking-wide text-gray-700 text-sm font-base mb-2">
-                                                Name<span className='text-red-400 pl-1'>*</span>
-                                            </label>
-                                            {/* appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" */}
-                                            <input className="appearance-none block w-full text-gray-300 border rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"></input>
-                                        </div>
-                                        <div className="w-full md:w-1/2 px-3">
-                                            <label className="block tracking-wide text-gray-700 text-sm font-base mb-2">
-                                                Email<span className='text-red-400 pl-1'>*</span>
-                                            </label>
-                                            <input type='email' className="appearance-none block w-full text-gray-300 border rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"></input>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap mt-4">
-                                        <p className='text-sm text-gray-600 mr-2'>Your review<span className='text-red-400 pl-1'>*</span></p>
-                                        <textarea
-                                            className="
-                                            mt-2
-                                            pr-2
-                                            w-full
-                                            p-5
-                                            h-50
-                                            border
-                                            border-gray-300
-                                            rounded-sm"/>
-                                    </div>
-                                    <div className='mt-8 flex items-center'>
-                                        <input type="checkbox" className="w-4 h-4 accent-blue-500 mr-4" />
-                                        <p className='block text-sm font-light text-gray-500'>Save my name, email, and website in this browser for the next time I comment.<span className='text-red-400'>*</span></p>
-                                    </div>
-                                    <button className="hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer shadow bg-[#2872fa] hover:bg-[#1864f1] flex items-center focus:shadow-outline focus:outline-none text-white text-base font-light py-2 px-6 rounded mt-6" type="button">
-                                        Submit
-                                    </button>
-                                </div>
+                                                <div className='mt-16'>
+                                                    <span className='font-semibold text-base block mt-4'>Be the first to review "{perproduct}"</span>
+                                                    <p className='block mt-4 text-sm font-light text-gray-500'>Your email address will not be published. Required fields are marked <span className='text-red-400'>*</span></p>
+                                                    
+                                                    <div className="flex gap-2 mt-8">
+                                                        <p className='text-xs text-gray-600 block mr-2'>YOUR RATING <span className='text-red-400'>*</span></p>
+                                                        {[1, 2, 3, 4, 5].map((star, strindx) => (
+                                                        <button
+                                                            key={star}
+                                                            onClick={() => setRating(star)}
+                                                            onMouseEnter={() => setHover(star)}
+                                                            onMouseLeave={() => setHover(0)}
+                                                            key={`sss-${strindx}`}>
+                                                            {star <= (hover || rating) ? (
+                                                                <FaStar className="text-base text-orange-400 cursor-pointer transition" />
+                                                            ) : (
+                                                                <FaRegStar className="text-base text-orange-400 cursor-pointer transition" />
+                                                            )}
+                                                        </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap mt-6">
+                                                    <div className="w-full md:w-1/2  mb-6 md:mb-0">
+                                                        <label className="block tracking-wide text-gray-700 text-sm font-base mb-2">
+                                                            Name<span className='text-red-400 pl-1'>*</span>
+                                                        </label>
+                                                        {/* appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" */}
+                                                        <input className="appearance-none block w-full text-gray-300 border rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"></input>
+                                                    </div>
+                                                    <div className="w-full md:w-1/2 px-3">
+                                                        <label className="block tracking-wide text-gray-700 text-sm font-base mb-2">
+                                                            Email<span className='text-red-400 pl-1'>*</span>
+                                                        </label>
+                                                        <input type='email' className="appearance-none block w-full text-gray-300 border rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"></input>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap mt-4">
+                                                    <p className='text-sm text-gray-600 mr-2'>Your review<span className='text-red-400 pl-1'>*</span></p>
+                                                    <textarea
+                                                        className="
+                                                        mt-2
+                                                        pr-2
+                                                        w-full
+                                                        p-5
+                                                        h-50
+                                                        border
+                                                        border-gray-300
+                                                        rounded-sm"/>
+                                                </div>
+                                                <div className='mt-8 flex items-center'>
+                                                    <input type="checkbox" className="w-4 h-4 accent-blue-500 mr-4" />
+                                                    <p className='block text-sm font-light text-gray-500'>Save my name, email, and website in this browser for the next time I comment.<span className='text-red-400'>*</span></p>
+                                                </div>
+                                                <button className="hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer shadow bg-[#2872fa] hover:bg-[#1864f1] flex items-center focus:shadow-outline focus:outline-none text-white text-base font-light py-2 px-6 rounded mt-6" type="button">
+                                                    Submit
+                                                </button>
+                                            </div>
+                                        </>
+                                    )
+                                }
                             </div>
                         </div>
 
                         <div className='mt-20'>
-                            <h1 className='text-xl font-semibold'>Related Product</h1>
-                            <Items filteredItems={relatedProduct}/> 
+                            <h1 className={`text-xl font-semibold ${isMobile ? 'mb-12' : ''}`}>Related Product</h1>
+                            <Items filteredItems={relatedProduct} loading={loading}/> 
                         </div>
                     </div>
                 </div>

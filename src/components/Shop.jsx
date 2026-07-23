@@ -95,157 +95,6 @@ export default function Shop() {
         return [...defaultCategories, ...dynamicCategories];
     }, [categories]);
 
-    // useEffect(() => {
-    //     fetchData();
-
-    //     const channel = supabase
-    //         .channel("product-changes")
-    //         .on(
-    //         "postgres_changes",
-    //         {
-    //             event: "UPDATE",
-    //             schema: "public",
-    //             table: "product",
-    //         },
-    //         (payload) => {
-    //             // console.log("Product updated:", payload);
-
-    //             // Status changed to published
-    //             if (payload.new.status === "published") {
-    //             fetchData();
-    //             }
-    //         }
-    //         )
-    //         .subscribe();
-
-    //         return () => {
-    //             supabase.removeChannel(channel);
-    //         };
-    // }, []);
-
-    // async function fetchData() {
-    //     setIsLoading(true);
-
-    //     const [
-    //         { data: products, error: productError },
-    //         { data: attributes, error: attributesError },
-    //         { data: values, error: valuesError }
-    //     ] = await Promise.all([
-    //         supabase
-    //             .from("product")
-    //             .select("*")
-    //             .eq("status", "published"),
-
-    //         supabase
-    //             .from("product_attribute")
-    //             .select("*"),
-
-    //         supabase
-    //             .from("product_attribute_value")
-    //             .select("*")
-    //     ]);
-
-    //     if (
-    //         productError ||
-    //         attributesError ||
-    //         valuesError
-    //     ) {
-    //         console.error(
-    //             productError ||
-    //             attributesError ||
-    //             valuesError
-    //         );
-
-    //         setIsLoading(false);
-    //         return;
-    //     }
-
-    //     // Create attribute lookup
-    //     const attributeMap = Object.fromEntries(
-    //         attributes
-    //             .filter(attr => attr.name == "brand")
-    //             .map(attr => [
-    //                 attr.product_id,
-    //                 attr
-    //             ])
-    //     );
-
-    //     const finishMap = Object.fromEntries(
-    //         attributes
-    //             .filter(attr => attr.name == "finish")
-    //             .map(attr => [
-    //                 attr.product_id,
-    //                 attr
-    //             ])
-    //     );
-
-    //     const attr_id = Object.fromEntries(
-    //         attributes
-    //             .filter(attr => attr.name == "Color Variation")
-    //             .map(attr => [
-    //                 attr.product_id,
-    //                 attr
-    //             ])
-    //     );
-
-    //     // Create value lookup
-    //     const valueMap = Object.fromEntries(
-    //         values.map(value => [
-    //             value.attribute_id,
-    //             value
-    //         ])
-    //     );
-
-
-    //     const filteredData = products.map(product => {
-    //         const brandAttribute = attributeMap[product.id];
-    //         const finishAttribute = finishMap[product.id];
-    //         const idAttribute = attr_id[product.id];
-
-    //         const attr = brandAttribute
-    //             ? valueMap[brandAttribute.id]
-    //             : null;
-
-    //         const vals = finishAttribute
-    //             ? valueMap[finishAttribute.id]
-    //             : null;
-
-    //         const attrid = idAttribute
-    //             ? valueMap[idAttribute.id]
-    //             : null;   
-
-    //         return {
-    //             ...product,
-    //             brand: attr?.value ?? null,
-    //             finish: vals?.value ?? null,
-    //             attr_id: attrid?.id ?? null,
-    //             prod_attr_id: attrid?.attribute_id ?? null
-    //         };
-    //     });
-
-
-    //     // console.log(filteredData);
-    //     // console.log(products);
-    //     // console.log(attributes);
-    //     // console.log(values);
-    //     // console.log('----------');
-
-    //     const filteredStore = [
-    //         ...new Map(
-    //             filteredData
-    //             .filter(item =>
-    //                 item.Store?.trim() &&
-    //                 item.brand?.trim()
-    //             )
-    //             .map(item => [item.Store, item])
-    //         ).values()
-    //     ];
-    //     // console.log(filteredStore);
-    //     setBrands(filteredStore);
-
-    //     setData(filteredData);
-    //     setIsLoading(false);
-    // }
 
     useEffect(() => {
         const slider = categorySliderRef.current;
@@ -415,7 +264,7 @@ export default function Shop() {
                     <button
                         onClick={() => scroll(categorySliderRef, "left")}
                         className={`shrink-0 ${!isMobile ? 'p-3' : 'p-1'}`}>
-                        <FaAngleLeft className="text-2xl cursor-pointer" />
+                        <FaAngleLeft className={`${isMobile ? 'text-2xl' : 'text-4xl'} cursor-pointer`}/>
                     </button>
                 )}
 
@@ -486,7 +335,7 @@ export default function Shop() {
                             shrink-0
                             cursor-pointer
                             ${!isMobile ? 'p-3' : 'p-1'}`}>
-                        <FaAngleRight className="text-2xl" />
+                        <FaAngleRight className={`${isMobile ? 'text-2xl' : 'text-4xl'} cursor-pointer`} />
                     </button>
                 )}
             </div>
@@ -498,7 +347,7 @@ export default function Shop() {
                     <button
                         onClick={() => scroll(sliderRef, "left")}
                         className={`shrink-0 ${!isMobile ? 'p-3' : 'p-1'}`}>
-                        <FaAngleLeft className="text-2xl cursor-pointer" />
+                        <FaAngleLeft className={`${isMobile ? 'text-2xl' : 'text-4xl'} cursor-pointer`} />
                     </button>
                 )}
                 <div
@@ -534,7 +383,7 @@ export default function Shop() {
                                 <img
                                     src={new URL(`../assets/img/store.png`,import.meta.url).href}
                                     alt={dt.Store}
-                                    className="w-full h-20 object-contain"
+                                    className={`w-full ${isMobile ? 'h-15' : 'h-18'} object-contain`}
                                 />
                                 <h2 className="text-sm text-center mt-1 font-semibold">
                                     {dt.Store}
@@ -565,7 +414,7 @@ export default function Shop() {
                             shrink-0
                             cursor-pointer
                             ${!isMobile ? 'p-3' : 'p-1'}`}>
-                        <FaAngleRight className="text-2xl" />
+                        <FaAngleRight className={`${isMobile ? 'text-2xl' : 'text-4xl'} cursor-pointer`} />
                     </button>
                 )}
             </div>
